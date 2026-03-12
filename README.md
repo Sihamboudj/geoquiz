@@ -18,7 +18,7 @@ Ce site est une **Progressive Web App** — tu peux l'installer directement sur 
 ## 🚀 Comment lancer en local
 ```bash
 # Clone le repo
-git clone https://github.com/TON_PSEUDO/geoquiz.git
+git clone https://github.com/Sihamboudj/geoquiz.git
 
 # Ouvre simplement index.html dans ton navigateur
 # Ou utilise Live Server sur VS Code
@@ -28,7 +28,7 @@ git clone https://github.com/TON_PSEUDO/geoquiz.git
 Le classement est sauvegardé localement. La version Firebase (classement mondial en ligne) arrive bientôt !
 
 ## 🌐 Voir le site
-👉 **[TON_PSEUDO.github.io/geoquiz](https://TON_PSEUDO.github.io/geoquiz)**
+👉 **[Sihamboudj.github.io/geoquiz](https://Sihamboudj.github.io/geoquiz)**
 
 ---
 Créé avec ❤️ par **© S. Boudjaidi** 🇩🇿
