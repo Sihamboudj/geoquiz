@@ -3,7 +3,7 @@
 // 🔧 NUMÉRO DE VERSION — À CHANGER à chaque mise à jour !
 // Ex: geoquiz-v1.0.0 → geoquiz-v1.1.0 → geoquiz-v2.0.0
 // =============================================
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.0.1';
 const CACHE_NAME = `geoquiz-v${APP_VERSION}`;
 const ASSETS = [
   './',
