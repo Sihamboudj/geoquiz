@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GéoQuiz — Monde & Algérie</title>
+<!-- © 2026 S. Boudjaidi — Tous droits réservés -->
+<meta name="theme-color" content="#00e5ff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GéoQuiz">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<meta property="og:title" content="🌍 GéoQuiz — Quiz Mondial & Algérie">
+<meta property="og:description" content="Teste tes connaissances ! Capitales, drapeaux, 48 wilayas 🇩🇿">
+<meta property="og:image" content="icons/icon-512.png">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAdSfqt_xB3vKevjehY-QkhjKhud7HYH9k",
+  authDomain: "geoquiz-42134.firebaseapp.com",
+  projectId: "geoquiz-42134",
+  storageBucket: "geoquiz-42134.firebasestorage.app",
+  messagingSenderId: "700656103927",
+  appId: "1:700656103927:web:c0f6c6986fa162072b3ef2"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Mulish:wght@300;400;600;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0f1e; --card:#111827; --card2:#1a2235;
+  --accent:#00e5ff; --accent2:#ff6b35; --accent3:#a78bfa;
+  --gold:#ffd700; --text:#f0f4ff; --muted:#8896b3;
+  --success:#22c55e; --error:#ef4444;
+  --border:rgba(0,229,255,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Mulish',sans-serif;min-height:100vh;overflow-x:hidden;}
+body.ar{font-family:'Noto Sans Arabic','Mulish',sans-serif;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 80% 50% at 20% 20%,rgba(0,229,255,0.06) 0%,transparent 60%),
+  radial-gradient(ellipse 60% 40% at 80% 80%,rgba(167,139,250,0.06) 0%,transparent 60%);
+  pointer-events:none;z-index:0;}
+
+/* ===== LANGUAGE SCREEN ===== */
+.lang-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;position:relative;z-index:1;animation:fadeUp .5s ease;}
+.lang-logo{font-family:'Syne',sans-serif;font-size:clamp(2.5rem,8vw,5rem);font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent3),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem;}
+.lang-sub{color:var(--muted);font-size:.9rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:3rem;}
+.lang-title{font-family:'Syne',sans-serif;font-size:1.2rem;color:var(--text);margin-bottom:1.5rem;opacity:.7;}
+.lang-grid{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:2.5rem;}
+.lang-card{background:var(--card);border:2px solid var(--border);border-radius:20px;cursor:pointer;transition:all .25s;text-align:center;width:130px;height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;}
+.lang-card:hover{border-color:var(--accent);transform:translateY(-4px);background:rgba(0,229,255,0.05);}
+.lang-card .flag{font-size:2.8rem;line-height:1;display:block;}
+.lang-card .name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text);display:block;}
+.lang-card .native{font-size:.8rem;color:var(--muted);display:block;}
+
+/* ===== NAME SCREEN ===== */
+.name-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;position:relative;z-index:1;}
+.name-screen.show{display:flex;animation:fadeUp .5s ease;}
+.name-title{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:.5rem;text-align:center;}
+.name-sub{color:var(--muted);margin-bottom:2rem;text-align:center;}
+.name-input{background:var(--card);border:2px solid var(--border);color:var(--text);border-radius:14px;padding:1rem 1.5rem;font-size:1.1rem;font-family:'Mulish',sans-serif;width:100%;max-width:360px;outline:none;transition:border .2s;text-align:inherit;}
+.name-input:focus{border-color:var(--accent);}
+.name-btn{margin-top:1rem;background:linear-gradient(135deg,var(--accent),var(--accent3));color:var(--bg);border:none;border-radius:14px;padding:1rem 2.5rem;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:360px;transition:opacity .2s;}
+.name-btn:hover{opacity:.88;}
+.name-skip{margin-top:.75rem;color:var(--muted);font-size:.85rem;cursor:pointer;text-decoration:underline;}
+
+/* ===== HEADER ===== */
+header{text-align:center;padding:1.5rem 1rem .8rem;position:relative;z-index:1;}
+.logo{font-family:'Syne',sans-serif;font-size:clamp(1.6rem,5vw,2.5rem);font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent3),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.player-name{font-size:.85rem;color:var(--muted);margin-top:.2rem;}
+.player-name span{color:var(--accent);font-weight:700;}
+
+/* ===== SCORE BAR ===== */
+.score-bar{display:flex;justify-content:center;gap:1rem;padding:.8rem 1rem;position:relative;z-index:1;flex-wrap:wrap;}
+.score-item{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.5rem 1.2rem;}
+.score-item .val{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--accent);}
+.score-item .lbl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+
+/* ===== PROGRESS ===== */
+.progress-wrap{max-width:620px;margin:0 auto .8rem;padding:0 1.5rem;position:relative;z-index:1;}
+.progress-bar{height:5px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:4px;transition:width .5s ease;}
+.progress-text{font-size:.75rem;color:var(--muted);margin-top:.4rem;text-align:right;}
+
+/* ===== MODES ===== */
+.modes{display:flex;justify-content:center;gap:.6rem;padding:0 1rem 1.2rem;flex-wrap:wrap;position:relative;z-index:1;}
+.mode-btn{background:var(--card);border:1.5px solid var(--border);color:var(--muted);border-radius:100px;padding:.45rem 1rem;font-family:'Mulish',sans-serif;font-size:.82rem;cursor:pointer;transition:all .25s;font-weight:600;}
+.mode-btn:hover{border-color:var(--accent);color:var(--accent);}
+.mode-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent3));border-color:transparent;color:var(--bg);font-weight:700;}
+
+/* ===== QUESTION CARD ===== */
+.quiz-wrap{max-width:620px;margin:0 auto;padding:0 1.2rem 2rem;position:relative;z-index:1;}
+.question-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:1.8rem;margin-bottom:1rem;text-align:center;position:relative;overflow:hidden;animation:slideIn .4s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.category-tag{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);background:rgba(255,107,53,0.1);border-radius:6px;padding:.25rem .75rem;margin-bottom:1rem;}
+.flag-display{font-size:5rem;line-height:1;margin:.3rem 0 .8rem;}
+.wilaya-num{font-size:4rem;font-weight:800;font-family:'Syne',sans-serif;color:var(--accent);margin:.3rem 0 .8rem;line-height:1;}
+.question-text{font-family:'Syne',sans-serif;font-size:clamp(.95rem,2.5vw,1.2rem);font-weight:700;line-height:1.4;}
+.hint{font-size:.8rem;color:var(--muted);margin-top:.4rem;}
+
+/* ===== ANSWERS ===== */
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.9rem;}
+.ans-btn{background:var(--card2);border:1.5px solid rgba(255,255,255,0.07);color:var(--text);border-radius:14px;padding:.9rem .7rem;font-family:'Mulish',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;line-height:1.3;}
+.ans-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(0,229,255,0.06);transform:translateY(-2px);}
+.ans-btn.correct{background:rgba(34,197,94,0.15);border-color:var(--success);color:var(--success);animation:pop .35s ease;}
+.ans-btn.wrong{background:rgba(239,68,68,0.12);border-color:var(--error);color:var(--error);}
+.ans-btn.reveal{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.35);color:rgba(34,197,94,0.75);}
+.ans-btn:disabled{cursor:default;}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+
+/* ===== FEEDBACK ===== */
+.feedback{text-align:center;padding:.9rem;border-radius:14px;font-size:.92rem;font-weight:600;margin-bottom:.9rem;display:none;animation:fadeIn .3s ease;}
+.feedback.show{display:block;}
+.feedback.good{background:rgba(34,197,94,0.12);color:var(--success);border:1px solid rgba(34,197,94,0.25);}
+.feedback.bad{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
+@keyframes fadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+
+/* ===== NEXT ===== */
+.next-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent3));color:var(--bg);border:none;border-radius:14px;padding:.95rem;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;display:none;transition:opacity .2s,transform .2s;}
+.next-btn:hover{opacity:.9;transform:translateY(-1px);}
+.next-btn.show{display:block;}
+
+/* ===== RESULT ===== */
+.result-screen{display:none;text-align:center;padding:2rem 1.5rem;max-width:620px;margin:0 auto;position:relative;z-index:1;}
+.result-screen.show{display:block;animation:fadeUp .5s ease;}
+.result-emoji{font-size:4rem;margin-bottom:.8rem;}
+.result-title{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.result-sub{color:var(--muted);margin:.4rem 0 1.2rem;}
+.result-big{font-family:'Syne',sans-serif;font-size:3.5rem;font-weight:800;color:var(--accent);margin:.5rem 0;}
+.streak-badge{display:inline-block;background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:.3rem .8rem;font-size:.8rem;color:var(--gold);}
+.result-btns{display:flex;gap:.8rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;}
+.restart-btn{background:linear-gradient(135deg,var(--accent2),var(--gold));color:white;border:none;border-radius:14px;padding:.9rem 2rem;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .2s;}
+.restart-btn:hover{transform:scale(1.03);}
+.board-btn{background:var(--card);border:2px solid var(--accent3);color:var(--accent3);border-radius:14px;padding:.9rem 2rem;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.board-btn:hover{background:rgba(167,139,250,0.1);}
+
+/* ===== LEADERBOARD ===== */
+.leader-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;padding:1rem;}
+.leader-overlay.show{display:flex;animation:fadeIn .3s ease;}
+.leader-box{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:2rem;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;position:relative;}
+.leader-title{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:1.5rem;background:linear-gradient(135deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.leader-close{position:absolute;top:1rem;right:1.2rem;background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer;font-family:'Syne',sans-serif;}
+.leader-tabs{display:flex;gap:.5rem;margin-bottom:1.2rem;background:var(--card2);border-radius:12px;padding:.3rem;}
+.ltab{flex:1;text-align:center;padding:.5rem;border-radius:9px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--muted);transition:all .2s;}
+.ltab.active{background:var(--accent);color:var(--bg);}
+.leader-row{display:flex;align-items:center;gap:.8rem;padding:.7rem;border-radius:12px;margin-bottom:.5rem;background:var(--card2);transition:background .2s;}
+.leader-row.me{background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);}
+.rank-num{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;width:30px;text-align:center;color:var(--muted);}
+.rank-num.gold{color:var(--gold);}
+.rank-num.silver{color:#c0c0c0;}
+.rank-num.bronze{color:#cd7f32;}
+.rank-name{flex:1;font-weight:600;font-size:.92rem;}
+.rank-score{font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);font-size:1rem;}
+.rank-mode{font-size:.7rem;color:var(--muted);background:rgba(255,255,255,0.05);border-radius:5px;padding:.15rem .4rem;}
+.leader-empty{text-align:center;color:var(--muted);padding:2rem;font-size:.9rem;}
+
+/* ===== LEADERBOARD BTN in header ===== */
+.top-bar{display:flex;justify-content:flex-end;padding:.5rem 1.5rem 0;position:relative;z-index:1;}
+.lb-open-btn{background:none;border:1px solid var(--border);color:var(--accent3);border-radius:10px;padding:.4rem .9rem;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Mulish',sans-serif;transition:all .2s;}
+.lb-open-btn:hover{background:rgba(167,139,250,0.1);border-color:var(--accent3);}
+
+/* ===== ARABIC RTL ===== */
+body.ar .progress-text{text-align:left;}
+body.ar .name-input{text-align:right;}
+</style>
+</head>
+<body>
+
+<!-- LANGUAGE SCREEN -->
+<div class="lang-screen" id="lang-screen">
+  <div class="lang-logo">🌍 GéoQuiz</div>
+  <div class="lang-sub">World · Algérie · عالم</div>
+  <div class="lang-title" id="lang-choose">Choisissez votre langue</div>
+  <div class="lang-grid">
+    <div class="lang-card" onclick="chooseLang('fr')">
+      <div class="flag">🇫🇷</div>
+      <div class="name">Français</div>
+      <div class="native">Français</div>
+    </div>
+    <div class="lang-card" onclick="chooseLang('ar')">
+      <div class="flag">🇩🇿</div>
+      <div class="name">العربية</div>
+      <div class="native">Arabic</div>
+    </div>
+    <div class="lang-card" onclick="chooseLang('en')">
+      <div class="flag">🇬🇧</div>
+      <div class="name">English</div>
+      <div class="native">English</div>
+    </div>
+  </div>
+</div>
+
+<!-- NAME SCREEN -->
+<div class="name-screen" id="name-screen">
+  <div class="name-title" id="name-title">Quel est ton pseudo ?</div>
+  <div class="name-sub" id="name-sub">Pour figurer dans le classement mondial 🏆</div>
+  <input type="text" class="name-input" id="name-input" maxlength="20" placeholder="Ton pseudo...">
+  <button class="name-btn" id="name-btn" onclick="submitName()">Commencer !</button>
+  <div class="name-skip" id="name-skip" onclick="skipName()">Passer sans pseudo</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none;">
+  <div class="top-bar">
+    <button class="lb-open-btn" onclick="openLeaderboard()" id="lb-btn">🏆 Classement</button>
+  </div>
+  <header>
+    <div class="logo">🌍 GéoQuiz</div>
+    <div class="player-name" id="player-display"></div>
+    <div id="action-btns" style="display:none;margin-top:.5rem;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;">
+      <button id="btn-pseudo" onclick="changePseudo()" style="background:rgba(0,229,255,0.1);border:1.5px solid #00e5ff;color:#00e5ff;border-radius:10px;padding:.4rem 1rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:Mulish,sans-serif;">✏️ Pseudo</button>
+      <button id="btn-lang" onclick="openLangOverlay()" style="background:rgba(167,139,250,0.1);border:1.5px solid #a78bfa;color:#a78bfa;border-radius:10px;padding:.4rem 1rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:Mulish,sans-serif;">🌐 FR</button>
+    </div>
+  </header>
+
+  <div class="score-bar">
+    <div class="score-item"><div class="val" id="score">0</div><div class="lbl" id="lbl-score">Score</div></div>
+    <div class="score-item"><div class="val" id="streak">0🔥</div><div class="lbl" id="lbl-streak">Série</div></div>
+    <div class="score-item"><div class="val" id="best">0</div><div class="lbl" id="lbl-best">Meilleur</div></div>
+  </div>
+
+  <div class="modes" id="modes-bar">
+    <button class="mode-btn active" onclick="setMode('capitales',this)" id="btn-capitales">🏛️ Capitales</button>
+    <button class="mode-btn" onclick="setMode('drapeaux',this)" id="btn-drapeaux">🚩 Drapeaux</button>
+    <button class="mode-btn" onclick="setMode('wilayas',this)" id="btn-wilayas">🇩🇿 Wilayas</button>
+    <button class="mode-btn" onclick="setMode('mix',this)" id="btn-mix">🎲 Mix</button>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="progress-text" id="progress-text"></div>
+  </div>
+
+  <div class="quiz-wrap">
+    <div id="quiz-area">
+      <div class="question-card">
+        <div class="category-tag" id="cat-tag"></div>
+        <div id="visual-display"></div>
+        <div class="question-text" id="question-text"></div>
+        <div class="hint" id="hint-text"></div>
+      </div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()"></button>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+      <div class="result-emoji" id="result-emoji">🏆</div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-big" id="result-big"></div>
+      <div class="streak-badge" id="streak-badge"></div>
+      <div class="result-btns">
+        <button class="restart-btn" onclick="restart()" id="restart-btn">🔄 Rejouer</button>
+        <button class="board-btn" onclick="openLeaderboard()" id="result-lb-btn">🏆 Classement</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LANGUE OVERLAY -->
+<div id="lang-overlay" onclick="if(event.target===this)closeLangOverlay()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:center;justify-content:center;">
+  <div style="background:#111827;border:1.5px solid rgba(0,229,255,0.2);border-radius:24px;padding:2rem 1.5rem;width:88%;max-width:320px;text-align:center;">
+    <div style="font-family:Syne,sans-serif;font-size:1.2rem;font-weight:700;color:#f0f4ff;margin-bottom:1.4rem;">🌐 Changer la langue</div>
+    <div onclick="switchLang('fr')" style="display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:14px;cursor:pointer;border:1.5px solid rgba(0,229,255,0.15);margin-bottom:.7rem;background:rgba(255,255,255,0.02);">
+      <span style="font-size:2rem;min-width:2rem;">🇫🇷</span>
+      <div style="text-align:left;"><div style="font-weight:700;font-size:1rem;color:#f0f4ff;">Français</div><div style="font-size:.8rem;color:#8896b3;">French</div></div>
+    </div>
+    <div onclick="switchLang('ar')" style="display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:14px;cursor:pointer;border:1.5px solid rgba(0,229,255,0.15);margin-bottom:.7rem;background:rgba(255,255,255,0.02);">
+      <span style="font-size:2rem;min-width:2rem;">🇩🇿</span>
+      <div style="text-align:left;"><div style="font-weight:700;font-size:1rem;color:#f0f4ff;">العربية</div><div style="font-size:.8rem;color:#8896b3;">Arabic</div></div>
+    </div>
+    <div onclick="switchLang('en')" style="display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:14px;cursor:pointer;border:1.5px solid rgba(0,229,255,0.15);margin-bottom:.7rem;background:rgba(255,255,255,0.02);">
+      <span style="font-size:2rem;min-width:2rem;">🇬🇧</span>
+      <div style="text-align:left;"><div style="font-weight:700;font-size:1rem;color:#f0f4ff;">English</div><div style="font-size:.8rem;color:#8896b3;">English</div></div>
+    </div>
+    <div onclick="closeLangOverlay()" style="margin-top:.5rem;color:#8896b3;font-size:.9rem;cursor:pointer;padding:.5rem;">✕ Fermer</div>
+  </div>
+</div>
+
+<!-- LEADERBOARD OVERLAY -->
+<div class="leader-overlay" id="leader-overlay">
+  <div class="leader-box">
+    <button class="leader-close" onclick="closeLeaderboard()">✕</button>
+    <div class="leader-title" id="lb-title">🏆 Classement Mondial</div>
+    <div class="leader-tabs" id="lb-tabs">
+      <div class="ltab active" onclick="switchTab('all',this)" id="tab-all">Tous</div>
+      <div class="ltab" onclick="switchTab('capitales',this)" id="tab-cap">Capitales</div>
+      <div class="ltab" onclick="switchTab('drapeaux',this)" id="tab-dra">Drapeaux</div>
+      <div class="ltab" onclick="switchTab('wilayas',this)" id="tab-wil">Wilayas</div>
+    </div>
+    <div id="lb-list"></div>
+  </div>
+</div>
+
+<script>
+// ===== TRANSLATIONS =====
+const T = {
+  fr: {
+    chooseMode:'Choisissez votre langue',
+    nameTit:'Quel est ton pseudo ?',
+    nameSub:'Pour figurer dans le classement mondial 🏆',
+    namePh:'Ton pseudo...',
+    nameBtn:'Commencer !',
+    nameSkip:'Passer sans pseudo',
+    score:'Score', streak:'Série', best:'Meilleur',
+    capitales:'🏛️ Capitales', drapeaux:'🚩 Drapeaux', wilayas:'🇩🇿 Wilayas', mix:'🎲 Mix',
+    catCap:'Capitales', catDra:'Drapeaux', catWil:'Wilayas',
+    qCap:'Quelle est la capitale de', qDra:'À quel pays appartient ce drapeau ?',
+    qWil:'Quelle est la wilaya numéro',
+    next:'Question suivante →', restart:'🔄 Rejouer', lbBtn:'🏆 Classement',
+    good:['✅ Excellent !','🎉 Parfait !','⭐ Super !','🔥 En feu !'],
+    bad:'❌ Mauvaise réponse. La bonne réponse est :',
+    question:'Question', of:'/',
+    resultTit:['Continue d\'essayer !','Pas mal !','Bien joué !','Très bien !','Excellent !','Génie !'],
+    resultSub:['La géo, ça s\'apprend — réessaie !','Tu progresses, continue !','Tu connais bien ta géographie !','Impressionnant !','Tu es un(e) expert(e) !','Génie absolu 🌍'],
+    streakBadge:'🔥 Meilleure série :',
+    lbTitle:'🏆 Classement Mondial',
+    tabAll:'Tous', tabCap:'Capitales', tabDra:'Drapeaux', tabWil:'Wilayas',
+    lbEmpty:'Pas encore de scores. Sois le premier !',
+    player:'Joueur', you:'(toi)'
+  },
+  ar: {
+    chooseMode:'اختر لغتك',
+    nameTit:'ما هو اسمك المستعار؟',
+    nameSub:'لتظهر في التصنيف العالمي 🏆',
+    namePh:'اسمك المستعار...',
+    nameBtn:'ابدأ !',
+    nameSkip:'تخطي بدون اسم',
+    score:'النقاط', streak:'سلسلة', best:'الأفضل',
+    capitales:'🏛️ العواصم', drapeaux:'🚩 الأعلام', wilayas:'🇩🇿 الولايات', mix:'🎲 مزيج',
+    catCap:'العواصم', catDra:'الأعلام', catWil:'الولايات',
+    qCap:'ما هي عاصمة', qDra:'لأي دولة تنتمي هذه العلم؟',
+    qWil:'ما هي الولاية رقم',
+    next:'السؤال التالي ←', restart:'🔄 العب مرة أخرى', lbBtn:'🏆 التصنيف',
+    good:['✅ ممتاز !','🎉 رائع !','⭐ أحسنت !','🔥 ملتهب !'],
+    bad:'❌ إجابة خاطئة. الإجابة الصحيحة هي :',
+    question:'سؤال', of:'/',
+    resultTit:['واصل المحاولة !','ليس سيئاً !','أحسنت !','ممتاز !','خبير !','عبقري !'],
+    resultSub:['الجغرافيا تُتعلم — حاول مجدداً !','أنت تتقدم، واصل !','تعرف جغرافياتك جيداً !','رائع !','أنت خبير جغرافيا !','عبقري مطلق 🌍'],
+    streakBadge:'🔥 أفضل سلسلة :',
+    lbTitle:'🏆 التصنيف العالمي',
+    tabAll:'الكل', tabCap:'العواصم', tabDra:'الأعلام', tabWil:'الولايات',
+    lbEmpty:'لا توجد نقاط بعد. كن الأول !',
+    player:'لاعب', you:'(أنت)'
+  },
+  en: {
+    chooseMode:'Choose your language',
+    nameTit:'What\'s your username?',
+    nameSub:'To appear in the world ranking 🏆',
+    namePh:'Your username...',
+    nameBtn:'Let\'s go !',
+    nameSkip:'Skip',
+    score:'Score', streak:'Streak', best:'Best',
+    capitales:'🏛️ Capitals', drapeaux:'🚩 Flags', wilayas:'🇩🇿 Wilayas', mix:'🎲 Mix',
+    catCap:'Capitals', catDra:'Flags', catWil:'Wilayas',
+    qCap:'What is the capital of', qDra:'Which country does this flag belong to?',
+    qWil:'What is wilaya number',
+    next:'Next question →', restart:'🔄 Play again', lbBtn:'🏆 Ranking',
+    good:['✅ Excellent!','🎉 Perfect!','⭐ Great!','🔥 On fire!'],
+    bad:'❌ Wrong. The correct answer is:',
+    question:'Question', of:'/',
+    resultTit:['Keep trying!','Not bad!','Well done!','Very good!','Excellent!','Genius!'],
+    resultSub:['Geography takes practice — try again!','You\'re improving, keep going!','You know your geography!','Impressive!','You\'re a geography expert!','Absolute genius 🌍'],
+    streakBadge:'🔥 Best streak:',
+    lbTitle:'🏆 World Ranking',
+    tabAll:'All', tabCap:'Capitals', tabDra:'Flags', tabWil:'Wilayas',
+    lbEmpty:'No scores yet. Be the first!',
+    player:'Player', you:'(you)'
+  }
+};
+
+// ===== DATA =====
+const DATA = {
+  capitales: {
+    fr:[
+      {q:'France',a:'Paris',w:['Lyon','Marseille','Bordeaux'],h:'🇫🇷 Europe de l\'Ouest'},
+      {q:'Espagne',a:'Madrid',w:['Barcelone','Séville','Valence'],h:'🇪🇸 Péninsule ibérique'},
+      {q:'Japon',a:'Tokyo',w:['Osaka','Kyoto','Hiroshima'],h:'🇯🇵 Asie de l\'Est'},
+      {q:'Brésil',a:'Brasília',w:['São Paulo','Rio de Janeiro','Salvador'],h:'🇧🇷 Amérique du Sud'},
+      {q:'Australie',a:'Canberra',w:['Sydney','Melbourne','Brisbane'],h:'🇦🇺 Océanie'},
+      {q:'Canada',a:'Ottawa',w:['Toronto','Vancouver','Montréal'],h:'🇨🇦 Amérique du Nord'},
+      {q:'Égypte',a:'Le Caire',w:['Alexandrie','Louxor','Assouan'],h:'🇪🇬 Afrique du Nord'},
+      {q:'Maroc',a:'Rabat',w:['Casablanca','Marrakech','Fès'],h:'🇲🇦 Maghreb'},
+      {q:'Turquie',a:'Ankara',w:['Istanbul','Izmir','Bursa'],h:'🇹🇷 Entre Europe et Asie'},
+      {q:'Argentine',a:'Buenos Aires',w:['Córdoba','Rosario','Mendoza'],h:'🇦🇷 Amérique du Sud'},
+      {q:'Inde',a:'New Delhi',w:['Mumbai','Kolkata','Bangalore'],h:'🇮🇳 Asie du Sud'},
+      {q:'Nigeria',a:'Abuja',w:['Lagos','Kano','Ibadan'],h:'🇳🇬 Afrique de l\'Ouest'},
+      {q:'Arabie Saoudite',a:'Riyad',w:['Djeddah','La Mecque','Médine'],h:'🇸🇦 Moyen-Orient'},
+      {q:'Chine',a:'Pékin',w:['Shanghai','Shenzhen','Guangzhou'],h:'🇨🇳 Asie de l\'Est'},
+      {q:'Russie',a:'Moscou',w:['Saint-Pétersbourg','Novossibirsk','Kazan'],h:'🇷🇺 Europe/Asie'},
+      {q:'Algérie',a:'Alger',w:['Oran','Constantine','Annaba'],h:'🇩🇿 Notre beau pays !'},
+      {q:'Tunisie',a:'Tunis',w:['Sfax','Sousse','Bizerte'],h:'🇹🇳 Maghreb'},
+      {q:'Grèce',a:'Athènes',w:['Thessalonique','Patras','Héraklion'],h:'🇬🇷 Europe du Sud'},
+      {q:'Portugal',a:'Lisbonne',w:['Porto','Braga','Setúbal'],h:'🇵🇹 Europe de l\'Ouest'},
+      {q:'Suède',a:'Stockholm',w:['Göteborg','Malmö','Uppsala'],h:'🇸🇪 Scandinavie'},
+      {q:'Mexique',a:'Mexico',w:['Guadalajara','Monterrey','Puebla'],h:'🇲🇽 Amérique centrale'},
+      {q:'Afrique du Sud',a:'Pretoria',w:['Le Cap','Johannesburg','Durban'],h:'🇿🇦 Afrique australe'},
+      {q:'Indonésie',a:'Jakarta',w:['Bali','Surabaya','Bandung'],h:'🇮🇩 Asie du Sud-Est'},
+      {q:'Pakistan',a:'Islamabad',w:['Karachi','Lahore','Peshawar'],h:'🇵🇰 Asie du Sud'},
+      {q:'Kenya',a:'Nairobi',w:['Mombasa','Kisumu','Nakuru'],h:'🇰🇪 Afrique de l\'Est'},
+    ],
+    ar:[
+      {q:'فرنسا',a:'باريس',w:['ليون','مرسيليا','بوردو'],h:'🇫🇷 غرب أوروبا'},
+      {q:'إسبانيا',a:'مدريد',w:['برشلونة','إشبيلية','فالنسيا'],h:'🇪🇸 شبه الجزيرة الإيبيرية'},
+      {q:'اليابان',a:'طوكيو',w:['أوساكا','كيوتو','هيروشيما'],h:'🇯🇵 شرق آسيا'},
+      {q:'البرازيل',a:'برازيليا',w:['ساو باولو','ريو دي جانيرو','سالفادور'],h:'🇧🇷 أمريكا الجنوبية'},
+      {q:'أستراليا',a:'كانبيرا',w:['سيدني','ملبورن','بريزبان'],h:'🇦🇺 أوقيانوسيا'},
+      {q:'كندا',a:'أوتاوا',w:['تورنتو','فانكوفر','مونتريال'],h:'🇨🇦 أمريكا الشمالية'},
+      {q:'مصر',a:'القاهرة',w:['الإسكندرية','الأقصر','أسوان'],h:'🇪🇬 شمال أفريقيا'},
+      {q:'المغرب',a:'الرباط',w:['الدار البيضاء','مراكش','فاس'],h:'🇲🇦 المغرب العربي'},
+      {q:'تركيا',a:'أنقرة',w:['إسطنبول','إزمير','بورصة'],h:'🇹🇷 بين أوروبا وآسيا'},
+      {q:'الأرجنتين',a:'بوينس آيرس',w:['قرطبة','روساريو','ميندوزا'],h:'🇦🇷 أمريكا الجنوبية'},
+      {q:'الهند',a:'نيودلهي',w:['مومباي','كولكاتا','بنغالور'],h:'🇮🇳 جنوب آسيا'},
+      {q:'نيجيريا',a:'أبوجا',w:['لاغوس','كانو','إيبادان'],h:'🇳🇬 غرب أفريقيا'},
+      {q:'المملكة العربية السعودية',a:'الرياض',w:['جدة','مكة','المدينة'],h:'🇸🇦 الشرق الأوسط'},
+      {q:'الصين',a:'بكين',w:['شنغهاي','شنتشن','قوانغتشو'],h:'🇨🇳 شرق آسيا'},
+      {q:'روسيا',a:'موسكو',w:['سان بطرسبرغ','نوفوسيبيرسك','قازان'],h:'🇷🇺 أوروبا/آسيا'},
+      {q:'الجزائر',a:'الجزائر العاصمة',w:['وهران','قسنطينة','عنابة'],h:'🇩🇿 بلدنا الجميل !'},
+      {q:'تونس',a:'تونس',w:['صفاقس','سوسة','بنزرت'],h:'🇹🇳 المغرب العربي'},
+      {q:'اليونان',a:'أثينا',w:['سالونيك','باتراس','هيراكليون'],h:'🇬🇷 جنوب أوروبا'},
+      {q:'البرتغال',a:'لشبونة',w:['بورتو','براغا','سيتوبال'],h:'🇵🇹 غرب أوروبا'},
+      {q:'السويد',a:'ستوكهولم',w:['غوتنبرغ','مالمو','أوبسالا'],h:'🇸🇪 斯堪的纳维亚'},
+      {q:'المكسيك',a:'مكسيكو سيتي',w:['غوادالاخارا','مونتيري','بويبلا'],h:'🇲🇽 أمريكا الوسطى'},
+      {q:'جنوب أفريقيا',a:'بريتوريا',w:['كيب تاون','جوهانسبرغ','ديربان'],h:'🇿🇦 جنوب أفريقيا'},
+      {q:'إندونيسيا',a:'جاكرتا',w:['بالي','سورابايا','باندونغ'],h:'🇮🇩 جنوب شرق آسيا'},
+      {q:'باكستان',a:'إسلام آباد',w:['كراتشي','لاهور','بيشاور'],h:'🇵🇰 جنوب آسيا'},
+      {q:'كينيا',a:'نيروبي',w:['مومباسا','كيسومو','ناكورو'],h:'🇰🇪 شرق أفريقيا'},
+    ],
+    en:[
+      {q:'France',a:'Paris',w:['Lyon','Marseille','Bordeaux'],h:'🇫🇷 Western Europe'},
+      {q:'Spain',a:'Madrid',w:['Barcelona','Seville','Valencia'],h:'🇪🇸 Iberian Peninsula'},
+      {q:'Japan',a:'Tokyo',w:['Osaka','Kyoto','Hiroshima'],h:'🇯🇵 East Asia'},
+      {q:'Brazil',a:'Brasília',w:['São Paulo','Rio de Janeiro','Salvador'],h:'🇧🇷 South America'},
+      {q:'Australia',a:'Canberra',w:['Sydney','Melbourne','Brisbane'],h:'🇦🇺 Oceania'},
+      {q:'Canada',a:'Ottawa',w:['Toronto','Vancouver','Montreal'],h:'🇨🇦 North America'},
+      {q:'Egypt',a:'Cairo',w:['Alexandria','Luxor','Aswan'],h:'🇪🇬 North Africa'},
+      {q:'Morocco',a:'Rabat',w:['Casablanca','Marrakech','Fez'],h:'🇲🇦 Maghreb'},
+      {q:'Turkey',a:'Ankara',w:['Istanbul','Izmir','Bursa'],h:'🇹🇷 Between Europe & Asia'},
+      {q:'Argentina',a:'Buenos Aires',w:['Córdoba','Rosario','Mendoza'],h:'🇦🇷 South America'},
+      {q:'India',a:'New Delhi',w:['Mumbai','Kolkata','Bangalore'],h:'🇮🇳 South Asia'},
+      {q:'Nigeria',a:'Abuja',w:['Lagos','Kano','Ibadan'],h:'🇳🇬 West Africa'},
+      {q:'Saudi Arabia',a:'Riyadh',w:['Jeddah','Mecca','Medina'],h:'🇸🇦 Middle East'},
+      {q:'China',a:'Beijing',w:['Shanghai','Shenzhen','Guangzhou'],h:'🇨🇳 East Asia'},
+      {q:'Russia',a:'Moscow',w:['Saint Petersburg','Novosibirsk','Kazan'],h:'🇷🇺 Europe/Asia'},
+      {q:'Algeria',a:'Algiers',w:['Oran','Constantine','Annaba'],h:'🇩🇿 Our beautiful country!'},
+      {q:'Tunisia',a:'Tunis',w:['Sfax','Sousse','Bizerte'],h:'🇹🇳 Maghreb'},
+      {q:'Greece',a:'Athens',w:['Thessaloniki','Patras','Heraklion'],h:'🇬🇷 Southern Europe'},
+      {q:'Portugal',a:'Lisbon',w:['Porto','Braga','Setúbal'],h:'🇵🇹 Western Europe'},
+      {q:'Sweden',a:'Stockholm',w:['Gothenburg','Malmö','Uppsala'],h:'🇸🇪 Scandinavia'},
+      {q:'Mexico',a:'Mexico City',w:['Guadalajara','Monterrey','Puebla'],h:'🇲🇽 Central America'},
+      {q:'South Africa',a:'Pretoria',w:['Cape Town','Johannesburg','Durban'],h:'🇿🇦 Southern Africa'},
+      {q:'Indonesia',a:'Jakarta',w:['Bali','Surabaya','Bandung'],h:'🇮🇩 Southeast Asia'},
+      {q:'Pakistan',a:'Islamabad',w:['Karachi','Lahore','Peshawar'],h:'🇵🇰 South Asia'},
+      {q:'Kenya',a:'Nairobi',w:['Mombasa','Kisumu','Nakuru'],h:'🇰🇪 East Africa'},
+    ]
+  },
+
+  drapeaux: [
+    {flag:'🇩🇿',a:{fr:'Algérie',ar:'الجزائر',en:'Algeria'},w:{fr:['Maroc','Tunisie','Libye'],ar:['المغرب','تونس','ليبيا'],en:['Morocco','Tunisia','Libya']}},
+    {flag:'🇫🇷',a:{fr:'France',ar:'فرنسا',en:'France'},w:{fr:['Belgique','Pays-Bas','Luxembourg'],ar:['بلجيكا','هولندا','لوكسمبورغ'],en:['Belgium','Netherlands','Luxembourg']}},
+    {flag:'🇩🇪',a:{fr:'Allemagne',ar:'ألمانيا',en:'Germany'},w:{fr:['Belgique','Autriche','Suisse'],ar:['بلجيكا','النمسا','سويسرا'],en:['Belgium','Austria','Switzerland']}},
+    {flag:'🇧🇷',a:{fr:'Brésil',ar:'البرازيل',en:'Brazil'},w:{fr:['Argentine','Colombie','Venezuela'],ar:['الأرجنتين','كولومبيا','فنزويلا'],en:['Argentina','Colombia','Venezuela']}},
+    {flag:'🇯🇵',a:{fr:'Japon',ar:'اليابان',en:'Japan'},w:{fr:['Corée du Sud','Chine','Taïwan'],ar:['كوريا الجنوبية','الصين','تايوان'],en:['South Korea','China','Taiwan']}},
+    {flag:'🇮🇳',a:{fr:'Inde',ar:'الهند',en:'India'},w:{fr:['Pakistan','Bangladesh','Sri Lanka'],ar:['باكستان','بنغلاديش','سريلانكا'],en:['Pakistan','Bangladesh','Sri Lanka']}},
+    {flag:'🇮🇹',a:{fr:'Italie',ar:'إيطاليا',en:'Italy'},w:{fr:['France','Irlande','Mexique'],ar:['فرنسا','إيرلندا','المكسيك'],en:['France','Ireland','Mexico']}},
+    {flag:'🇹🇷',a:{fr:'Turquie',ar:'تركيا',en:'Turkey'},w:{fr:['Tunisie','Pakistan','Azerbaïdjan'],ar:['تونس','باكستان','أذربيجان'],en:['Tunisia','Pakistan','Azerbaijan']}},
+    {flag:'🇸🇦',a:{fr:'Arabie Saoudite',ar:'المملكة العربية السعودية',en:'Saudi Arabia'},w:{fr:['Iran','Irak','Pakistan'],ar:['إيران','العراق','باكستان'],en:['Iran','Iraq','Pakistan']}},
+    {flag:'🇲🇦',a:{fr:'Maroc',ar:'المغرب',en:'Morocco'},w:{fr:['Algérie','Tunisie','Mauritanie'],ar:['الجزائر','تونس','موريتانيا'],en:['Algeria','Tunisia','Mauritania']}},
+    {flag:'🇳🇬',a:{fr:'Nigeria',ar:'نيجيريا',en:'Nigeria'},w:{fr:['Cameroun','Sénégal','Mali'],ar:['الكاميرون','السنغال','مالي'],en:['Cameroon','Senegal','Mali']}},
+    {flag:'🇦🇺',a:{fr:'Australie',ar:'أستراليا',en:'Australia'},w:{fr:['Nouvelle-Zélande','Fidji','Papouasie'],ar:['نيوزيلندا','فيجي','بابوا'],en:['New Zealand','Fiji','Papua']}},
+    {flag:'🇨🇦',a:{fr:'Canada',ar:'كندا',en:'Canada'},w:{fr:['États-Unis','Australie','Royaume-Uni'],ar:['الولايات المتحدة','أستراليا','المملكة المتحدة'],en:['USA','Australia','UK']}},
+    {flag:'🇦🇷',a:{fr:'Argentine',ar:'الأرجنتين',en:'Argentina'},w:{fr:['Uruguay','Chili','Paraguay'],ar:['أوروغواي','تشيلي','باراغواي'],en:['Uruguay','Chile','Paraguay']}},
+    {flag:'🇿🇦',a:{fr:'Afrique du Sud',ar:'جنوب أفريقيا',en:'South Africa'},w:{fr:['Zimbabwe','Kenya','Éthiopie'],ar:['زيمبابوي','كينيا','إثيوبيا'],en:['Zimbabwe','Kenya','Ethiopia']}},
+    {flag:'🇸🇪',a:{fr:'Suède',ar:'السويد',en:'Sweden'},w:{fr:['Norvège','Danemark','Finlande'],ar:['النرويج','الدنمارك','فنلندا'],en:['Norway','Denmark','Finland']}},
+    {flag:'🇷🇺',a:{fr:'Russie',ar:'روسيا',en:'Russia'},w:{fr:['Serbie','France','Pays-Bas'],ar:['صربيا','فرنسا','هولندا'],en:['Serbia','France','Netherlands']}},
+    {flag:'🇵🇹',a:{fr:'Portugal',ar:'البرتغال',en:'Portugal'},w:{fr:['Espagne','Italie','Grèce'],ar:['إسبانيا','إيطاليا','اليونان'],en:['Spain','Italy','Greece']}},
+    {flag:'🇪🇬',a:{fr:'Égypte',ar:'مصر',en:'Egypt'},w:{fr:['Yémen','Syrie','Irak'],ar:['اليمن','سوريا','العراق'],en:['Yemen','Syria','Iraq']}},
+    {flag:'🇰🇷',a:{fr:'Corée du Sud',ar:'كوريا الجنوبية',en:'South Korea'},w:{fr:['Japon','Chine','Taïwan'],ar:['اليابان','الصين','تايوان'],en:['Japan','China','Taiwan']}},
+    {flag:'🇮🇩',a:{fr:'Indonésie',ar:'إندونيسيا',en:'Indonesia'},w:{fr:['Malaisie','Philippines','Thaïlande'],ar:['ماليزيا','الفلبين','تايلاند'],en:['Malaysia','Philippines','Thailand']}},
+    {flag:'🇧🇪',a:{fr:'Belgique',ar:'بلجيكا',en:'Belgium'},w:{fr:['France','Pays-Bas','Allemagne'],ar:['فرنسا','هولندا','ألمانيا'],en:['France','Netherlands','Germany']}},
+    {flag:'🇳🇱',a:{fr:'Pays-Bas',ar:'هولندا',en:'Netherlands'},w:{fr:['Belgique','Luxembourg','France'],ar:['بلجيكا','لوكسمبورغ','فرنسا'],en:['Belgium','Luxembourg','France']}},
+    {flag:'🇨🇭',a:{fr:'Suisse',ar:'سويسرا',en:'Switzerland'},w:{fr:['Autriche','Liechtenstein','Luxembourg'],ar:['النمسا','ليختنشتاين','لوكسمبورغ'],en:['Austria','Liechtenstein','Luxembourg']}},
+    {flag:'🇵🇱',a:{fr:'Pologne',ar:'بولندا',en:'Poland'},w:{fr:['Slovaquie','Hongrie','Tchéquie'],ar:['سلوفاكيا','المجر','التشيك'],en:['Slovakia','Hungary','Czech Republic']}},
+  ],
+
+  wilayas: [
+    {num:1, a:{fr:'Adrar',ar:'أدرار',en:'Adrar'}, w:{fr:['Tamanrasset','Béchar','Illizi'],ar:['تمنراست','بشار','إليزي'],en:['Tamanrasset','Béchar','Illizi']}},
+    {num:2, a:{fr:'Chlef',ar:'الشلف',en:'Chlef'}, w:{fr:['Aïn Defla','Tissemsilt','Relizane'],ar:['عين الدفلى','تيسمسيلت','غليزان'],en:['Aïn Defla','Tissemsilt','Relizane']}},
+    {num:3, a:{fr:'Laghouat',ar:'الأغواط',en:'Laghouat'}, w:{fr:['Ghardaïa','Djelfa','El Bayadh'],ar:['غرداية','الجلفة','البيض'],en:['Ghardaïa','Djelfa','El Bayadh']}},
+    {num:4, a:{fr:'Oum El Bouaghi',ar:'أم البواقي',en:'Oum El Bouaghi'}, w:{fr:['Tébessa','Khenchela','Souk Ahras'],ar:['تبسة','خنشلة','سوق أهراس'],en:['Tébessa','Khenchela','Souk Ahras']}},
+    {num:5, a:{fr:'Batna',ar:'باتنة',en:'Batna'}, w:{fr:['Biskra','Khenchela','Oum El Bouaghi'],ar:['بسكرة','خنشلة','أم البواقي'],en:['Biskra','Khenchela','Oum El Bouaghi']}},
+    {num:6, a:{fr:'Béjaïa',ar:'بجاية',en:'Béjaïa'}, w:{fr:['Jijel','Tizi-Ouzou','Sétif'],ar:['جيجل','تيزي وزو','سطيف'],en:['Jijel','Tizi-Ouzou','Sétif']}},
+    {num:7, a:{fr:'Biskra',ar:'بسكرة',en:'Biskra'}, w:{fr:['El Oued','Khenchela','Batna'],ar:['الوادي','خنشلة','باتنة'],en:['El Oued','Khenchela','Batna']}},
+    {num:8, a:{fr:'Béchar',ar:'بشار',en:'Béchar'}, w:{fr:['Adrar','Tindouf','El Bayadh'],ar:['أدرار','تندوف','البيض'],en:['Adrar','Tindouf','El Bayadh']}},
+    {num:9, a:{fr:'Blida',ar:'البليدة',en:'Blida'}, w:{fr:['Médéa','Tipaza','Boumerdès'],ar:['المدية','تيبازة','بومرداس'],en:['Médéa','Tipaza','Boumerdès']}},
+    {num:10, a:{fr:'Bouira',ar:'البويرة',en:'Bouira'}, w:{fr:['Tizi-Ouzou','Béjaïa','M\'Sila'],ar:['تيزي وزو','بجاية','المسيلة'],en:['Tizi-Ouzou','Béjaïa','M\'Sila']}},
+    {num:11, a:{fr:'Tamanrasset',ar:'تمنراست',en:'Tamanrasset'}, w:{fr:['Adrar','Illizi','Ghardaïa'],ar:['أدرار','إليزي','غرداية'],en:['Adrar','Illizi','Ghardaïa']}},
+    {num:12, a:{fr:'Tébessa',ar:'تبسة',en:'Tébessa'}, w:{fr:['Souk Ahras','Oum El Bouaghi','Khenchela'],ar:['سوق أهراس','أم البواقي','خنشلة'],en:['Souk Ahras','Oum El Bouaghi','Khenchela']}},
+    {num:13, a:{fr:'Tlemcen',ar:'تلمسان',en:'Tlemcen'}, w:{fr:['Sidi Bel Abbès','Aïn Témouchent','Mascara'],ar:['سيدي بلعباس','عين تموشنت','معسكر'],en:['Sidi Bel Abbès','Aïn Témouchent','Mascara']}},
+    {num:14, a:{fr:'Tiaret',ar:'تيارت',en:'Tiaret'}, w:{fr:['Tissemsilt','Relizane','Mascara'],ar:['تيسمسيلت','غليزان','معسكر'],en:['Tissemsilt','Relizane','Mascara']}},
+    {num:15, a:{fr:'Tizi-Ouzou',ar:'تيزي وزو',en:'Tizi-Ouzou'}, w:{fr:['Béjaïa','Bouira','Boumerdès'],ar:['بجاية','البويرة','بومرداس'],en:['Béjaïa','Bouira','Boumerdès']}},
+    {num:16, a:{fr:'Alger',ar:'الجزائر',en:'Algiers'}, w:{fr:['Blida','Boumerdès','Tipaza'],ar:['البليدة','بومرداس','تيبازة'],en:['Blida','Boumerdès','Tipaza']}},
+    {num:17, a:{fr:'Djelfa',ar:'الجلفة',en:'Djelfa'}, w:{fr:['Laghouat','Tiaret','M\'Sila'],ar:['الأغواط','تيارت','المسيلة'],en:['Laghouat','Tiaret','M\'Sila']}},
+    {num:18, a:{fr:'Jijel',ar:'جيجل',en:'Jijel'}, w:{fr:['Béjaïa','Skikda','Mila'],ar:['بجاية','سكيكدة','ميلة'],en:['Béjaïa','Skikda','Mila']}},
+    {num:19, a:{fr:'Sétif',ar:'سطيف',en:'Sétif'}, w:{fr:['Béjaïa','Mila','Bordj Bou Arréridj'],ar:['بجاية','ميلة','برج بوعريريج'],en:['Béjaïa','Mila','Bordj Bou Arréridj']}},
+    {num:20, a:{fr:'Saïda',ar:'سعيدة',en:'Saïda'}, w:{fr:['Mascara','El Bayadh','Tiaret'],ar:['معسكر','البيض','تيارت'],en:['Mascara','El Bayadh','Tiaret']}},
+    {num:21, a:{fr:'Skikda',ar:'سكيكدة',en:'Skikda'}, w:{fr:['Annaba','Jijel','Guelma'],ar:['عنابة','جيجل','قالمة'],en:['Annaba','Jijel','Guelma']}},
+    {num:22, a:{fr:'Sidi Bel Abbès',ar:'سيدي بلعباس',en:'Sidi Bel Abbès'}, w:{fr:['Tlemcen','Mascara','Aïn Témouchent'],ar:['تلمسان','معسكر','عين تموشنت'],en:['Tlemcen','Mascara','Aïn Témouchent']}},
+    {num:23, a:{fr:'Annaba',ar:'عنابة',en:'Annaba'}, w:{fr:['Skikda','El Tarf','Guelma'],ar:['سكيكدة','الطارف','قالمة'],en:['Skikda','El Tarf','Guelma']}},
+    {num:24, a:{fr:'Guelma',ar:'قالمة',en:'Guelma'}, w:{fr:['Annaba','Souk Ahras','Oum El Bouaghi'],ar:['عنابة','سوق أهراس','أم البواقي'],en:['Annaba','Souk Ahras','Oum El Bouaghi']}},
+    {num:25, a:{fr:'Constantine',ar:'قسنطينة',en:'Constantine'}, w:{fr:['Mila','Skikda','Oum El Bouaghi'],ar:['ميلة','سكيكدة','أم البواقي'],en:['Mila','Skikda','Oum El Bouaghi']}},
+    {num:26, a:{fr:'Médéa',ar:'المدية',en:'Médéa'}, w:{fr:['Blida','Aïn Defla','Tissemsilt'],ar:['البليدة','عين الدفلى','تيسمسيلت'],en:['Blida','Aïn Defla','Tissemsilt']}},
+    {num:27, a:{fr:'Mostaganem',ar:'مستغانم',en:'Mostaganem'}, w:{fr:['Relizane','Mascara','Chlef'],ar:['غليزان','معسكر','الشلف'],en:['Relizane','Mascara','Chlef']}},
+    {num:28, a:{fr:'M\'Sila',ar:'المسيلة',en:'M\'Sila'}, w:{fr:['Bordj Bou Arréridj','Batna','Sétif'],ar:['برج بوعريريج','باتنة','سطيف'],en:['Bordj Bou Arréridj','Batna','Sétif']}},
+    {num:29, a:{fr:'Mascara',ar:'معسكر',en:'Mascara'}, w:{fr:['Tiaret','Sidi Bel Abbès','Relizane'],ar:['تيارت','سيدي بلعباس','غليزان'],en:['Tiaret','Sidi Bel Abbès','Relizane']}},
+    {num:30, a:{fr:'Ouargla',ar:'ورقلة',en:'Ouargla'}, w:{fr:['Ghardaïa','El Oued','Illizi'],ar:['غرداية','الوادي','إليزي'],en:['Ghardaïa','El Oued','Illizi']}},
+    {num:31, a:{fr:'Oran',ar:'وهران',en:'Oran'}, w:{fr:['Mostaganem','Aïn Témouchent','Sidi Bel Abbès'],ar:['مستغانم','عين تموشنت','سيدي بلعباس'],en:['Mostaganem','Aïn Témouchent','Sidi Bel Abbès']}},
+    {num:32, a:{fr:'El Bayadh',ar:'البيض',en:'El Bayadh'}, w:{fr:['Naama','Tiaret','Saïda'],ar:['النعامة','تيارت','سعيدة'],en:['Naama','Tiaret','Saïda']}},
+    {num:33, a:{fr:'Illizi',ar:'إليزي',en:'Illizi'}, w:{fr:['Tamanrasset','Ouargla','Adrar'],ar:['تمنراست','ورقلة','أدرار'],en:['Tamanrasset','Ouargla','Adrar']}},
+    {num:34, a:{fr:'Bordj Bou Arréridj',ar:'برج بوعريريج',en:'Bordj Bou Arréridj'}, w:{fr:['M\'Sila','Sétif','Béjaïa'],ar:['المسيلة','سطيف','بجاية'],en:['M\'Sila','Sétif','Béjaïa']}},
+    {num:35, a:{fr:'Boumerdès',ar:'بومرداس',en:'Boumerdès'}, w:{fr:['Alger','Tizi-Ouzou','Bouira'],ar:['الجزائر','تيزي وزو','البويرة'],en:['Algiers','Tizi-Ouzou','Bouira']}},
+    {num:36, a:{fr:'El Tarf',ar:'الطارف',en:'El Tarf'}, w:{fr:['Annaba','Guelma','Skikda'],ar:['عنابة','قالمة','سكيكدة'],en:['Annaba','Guelma','Skikda']}},
+    {num:37, a:{fr:'Tindouf',ar:'تندوف',en:'Tindouf'}, w:{fr:['Béchar','Adrar','El Bayadh'],ar:['بشار','أدرار','البيض'],en:['Béchar','Adrar','El Bayadh']}},
+    {num:38, a:{fr:'Tissemsilt',ar:'تيسمسيلت',en:'Tissemsilt'}, w:{fr:['Tiaret','Médéa','Chlef'],ar:['تيارت','المدية','الشلف'],en:['Tiaret','Médéa','Chlef']}},
+    {num:39, a:{fr:'El Oued',ar:'الوادي',en:'El Oued'}, w:{fr:['Biskra','Ouargla','Ghardaïa'],ar:['بسكرة','ورقلة','غرداية'],en:['Biskra','Ouargla','Ghardaïa']}},
+    {num:40, a:{fr:'Khenchela',ar:'خنشلة',en:'Khenchela'}, w:{fr:['Batna','Tébessa','Oum El Bouaghi'],ar:['باتنة','تبسة','أم البواقي'],en:['Batna','Tébessa','Oum El Bouaghi']}},
+    {num:41, a:{fr:'Souk Ahras',ar:'سوق أهراس',en:'Souk Ahras'}, w:{fr:['Tébessa','Guelma','Annaba'],ar:['تبسة','قالمة','عنابة'],en:['Tébessa','Guelma','Annaba']}},
+    {num:42, a:{fr:'Tipaza',ar:'تيبازة',en:'Tipaza'}, w:{fr:['Blida','Cherchell','Alger'],ar:['البليدة','شرشال','الجزائر'],en:['Blida','Cherchell','Algiers']}},
+    {num:43, a:{fr:'Mila',ar:'ميلة',en:'Mila'}, w:{fr:['Constantine','Jijel','Sétif'],ar:['قسنطينة','جيجل','سطيف'],en:['Constantine','Jijel','Sétif']}},
+    {num:44, a:{fr:'Aïn Defla',ar:'عين الدفلى',en:'Aïn Defla'}, w:{fr:['Chlef','Médéa','Tissemsilt'],ar:['الشلف','المدية','تيسمسيلت'],en:['Chlef','Médéa','Tissemsilt']}},
+    {num:45, a:{fr:'Naama',ar:'النعامة',en:'Naama'}, w:{fr:['El Bayadh','Béchar','Saïda'],ar:['البيض','بشار','سعيدة'],en:['El Bayadh','Béchar','Saïda']}},
+    {num:46, a:{fr:'Aïn Témouchent',ar:'عين تموشنت',en:'Aïn Témouchent'}, w:{fr:['Tlemcen','Sidi Bel Abbès','Oran'],ar:['تلمسان','سيدي بلعباس','وهران'],en:['Tlemcen','Sidi Bel Abbès','Oran']}},
+    {num:47, a:{fr:'Ghardaïa',ar:'غرداية',en:'Ghardaïa'}, w:{fr:['Ouargla','Laghouat','El Oued'],ar:['ورقلة','الأغواط','الوادي'],en:['Ouargla','Laghouat','El Oued']}},
+    {num:48, a:{fr:'Relizane',ar:'غليزان',en:'Relizane'}, w:{fr:['Chlef','Mascara','Mostaganem'],ar:['الشلف','معسكر','مستغانم'],en:['Chlef','Mascara','Mostaganem']}},
+  ]
+};
+
+// ===== STATE =====
+let lang = 'fr';
+let playerName = '';
+let mode = 'capitales';
+let questions = [];
+let current = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let answered = false;
+let lbTab = 'all';
+const TOTAL = 20;
+
+// ===== LANGUAGE SETUP =====
+function chooseLang(l) {
+  lang = l;
+  localStorage.setItem('gq_lang', l);
+  document.getElementById('lang-screen').style.display = 'none';
+  if (l === 'ar') {
+    document.body.classList.add('ar');
+    document.documentElement.setAttribute('dir','rtl');
+  } else {
+    document.body.classList.remove('ar');
+    document.documentElement.setAttribute('dir','ltr');
+  }
+  const saved = localStorage.getItem('gq_pseudo');
+  if (saved) { playerName = saved; startApp(); }
+  else showNameScreen();
+}
+
+function showNameScreen() {
+  const t = T[lang];
+  const ns = document.getElementById('name-screen');
+  document.getElementById('name-title').textContent = t.nameTit;
+  document.getElementById('name-sub').textContent = t.nameSub;
+  document.getElementById('name-input').placeholder = t.namePh;
+  document.getElementById('name-btn').textContent = t.nameBtn;
+  document.getElementById('name-skip').textContent = t.nameSkip;
+  ns.classList.add('show');
+  document.getElementById('name-input').focus();
+}
+
+function submitName() {
+  const val = document.getElementById('name-input').value.trim();
+  playerName = val || (T[lang].player + ' 🌍');
+  localStorage.setItem('gq_pseudo', playerName);
+  startApp();
+}
+function skipName() { playerName = ''; startApp(); }
+
+document.getElementById('name-input').addEventListener('keydown', e => { if(e.key==='Enter') submitName(); });
+
+function startApp() {
+  document.getElementById('name-screen').classList.remove('show');
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('action-btns').style.display = 'flex';
+  const langLabels = {fr:'🌐 FR', ar:'🌐 عر', en:'🌐 EN'};
+  document.getElementById('btn-lang').textContent = langLabels[lang] || '🌐';
+  applyLangUI();
+  restart();
+}
+function openLangOverlay() {
+  document.getElementById('lang-overlay').style.display = 'flex';
+}
+function closeLangOverlay() {
+  document.getElementById('lang-overlay').style.display = 'none';
+}
+function switchLang(l) {
+  lang = l;
+  localStorage.setItem('gq_lang', l);
+  if (l === 'ar') {
+    document.body.classList.add('ar');
+    document.documentElement.setAttribute('dir','rtl');
+  } else {
+    document.body.classList.remove('ar');
+    document.documentElement.setAttribute('dir','ltr');
+  }
+  const langLabels = {fr:'🌐 FR', ar:'🌐 عر', en:'🌐 EN'};
+  document.getElementById('btn-lang').textContent = langLabels[l];
+  applyLangUI();
+  closeLangOverlay();
+}
+function changePseudo() {
+  const newName = prompt('Nouveau pseudo ?', playerName);
+  if (newName && newName.trim()) {
+    playerName = newName.trim();
+    localStorage.setItem('gq_pseudo', playerName);
+    document.getElementById('player-display').innerHTML = '👤 ' + playerName;
+  }
+}
+
+function applyLangUI() {
+  const t = T[lang];
+  document.getElementById('lbl-score').textContent = t.score;
+  document.getElementById('lbl-streak').textContent = t.streak;
+  document.getElementById('lbl-best').textContent = t.best;
+  document.getElementById('btn-capitales').textContent = t.capitales;
+  document.getElementById('btn-drapeaux').textContent = t.drapeaux;
+  document.getElementById('btn-wilayas').textContent = t.wilayas;
+  document.getElementById('btn-mix').textContent = t.mix;
+  document.getElementById('lb-btn').textContent = t.lbBtn;
+  if(playerName) document.getElementById('player-display').innerHTML = `👤 <span>${playerName}</span>`;
+}
+
+// ===== MODE =====
+function setMode(m, btn) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  restart();
+}
+
+// ===== QUESTIONS =====
+function buildQuestions() {
+  const t = T[lang];
+  let pool = [];
+
+  if (mode === 'capitales' || mode === 'mix') {
+    const caps = DATA.capitales[lang] || DATA.capitales.fr;
+    caps.forEach(d => pool.push({
+      type:'cap', flag:'', visual:'',
+      q: t.qCap + ' ' + d.q + ' ?',
+      a: d.a, w: d.w, h: d.h
+    }));
+  }
+  if (mode === 'drapeaux' || mode === 'mix') {
+    DATA.drapeaux.forEach(d => pool.push({
+      type:'flag', flag: d.flag, visual:'',
+      q: t.qDra,
+      a: d.a[lang]||d.a.fr, w: d.w[lang]||d.w.fr, h:''
+    }));
+  }
+  if (mode === 'wilayas' || mode === 'mix') {
+    DATA.wilayas.forEach(d => pool.push({
+      type:'wilaya', flag:'', visual: d.num,
+      q: t.qWil + ' ' + d.num + ' ?',
+      a: d.a[lang]||d.a.fr, w: d.w[lang]||d.w.fr, h:''
+    }));
+  }
+  return pool.sort(() => Math.random()-0.5).slice(0, TOTAL);
+}
+
+function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
+
+// ===== LOAD QUESTION =====
+function loadQuestion() {
+  if (current >= questions.length) { showResult(); return; }
+  answered = false;
+  const q = questions[current];
+  const t = T[lang];
+  const pct = (current / questions.length)*100;
+
+  document.getElementById('progress').style.width = pct+'%';
+  document.getElementById('progress-text').textContent = `${t.question} ${current+1} ${t.of} ${questions.length}`;
+
+  const catMap = {cap:t.catCap, flag:t.catDra, wilaya:t.catWil};
+  document.getElementById('cat-tag').textContent = catMap[q.type]||'';
+
+  const vis = document.getElementById('visual-display');
+  if (q.flag) {
+    vis.className='flag-display'; vis.textContent=q.flag;
+  } else if (q.visual) {
+    vis.className='wilaya-num'; vis.textContent='#'+q.visual;
+  } else {
+    vis.className=''; vis.textContent='';
+  }
+
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('hint-text').textContent = q.h||'';
+
+  const opts = shuffle([q.a, ...q.w.slice(0,3)]);
+  const container = document.getElementById('answers');
+  container.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.textContent = opt;
+    btn.onclick = () => answer(btn, opt, q.a);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('next-btn').className = 'next-btn';
+  document.getElementById('next-btn').textContent = t.next;
+
+  const card = document.querySelector('.question-card');
+  card.style.animation='none';
+  setTimeout(()=>card.style.animation='slideIn .4s ease',10);
+}
+
+// ===== ANSWER =====
+function answer(btn, chosen, correct) {
+  if (answered) return;
+  answered = true;
+  const t = T[lang];
+  document.querySelectorAll('.ans-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('reveal');
+  });
+  const fb = document.getElementById('feedback');
+  if (chosen === correct) {
+    btn.classList.remove('reveal'); btn.classList.add('correct');
+    score++; streak++;
+    if (streak > bestStreak) bestStreak = streak;
+    fb.textContent = t.good[Math.floor(Math.random()*t.good.length)];
+    fb.className = 'feedback show good';
+  } else {
+    btn.classList.add('wrong'); streak=0;
+    fb.textContent = t.bad + ' ' + correct;
+    fb.className = 'feedback show bad';
+  }
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak+'🔥';
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function nextQuestion() { current++; loadQuestion(); }
+
+// ===== RESULT =====
+function showResult() {
+  document.getElementById('quiz-area').style.display='none';
+  const t = T[lang];
+  const pct = Math.round((score/questions.length)*100);
+  const idx = Math.min(Math.floor(pct/20), 5);
+  document.getElementById('result-emoji').textContent = ['😢','😕','🤔','😊','😎','🏆'][idx];
+  document.getElementById('result-title').textContent = t.resultTit[idx];
+  document.getElementById('result-sub').textContent = t.resultSub[idx];
+  document.getElementById('result-big').textContent = `${score}/${questions.length}`;
+  document.getElementById('streak-badge').textContent = `${t.streakBadge} ${bestStreak}`;
+  document.getElementById('restart-btn').textContent = t.restart;
+  document.getElementById('result-lb-btn').textContent = t.lbBtn;
+  document.getElementById('result-screen').className = 'result-screen show';
+
+  if (playerName) saveScore();
+  const bestKey = 'gq_best_'+mode;
+  const prev = parseInt(localStorage.getItem(bestKey)||'0');
+  if(score>prev) localStorage.setItem(bestKey, score);
+  document.getElementById('best').textContent = Math.max(score, prev);
+}
+
+// ===== LEADERBOARD =====
+function getScores() {
+  try { return JSON.parse(localStorage.getItem('gq_scores')||'[]'); } catch{return[];}
+}
+async function saveScore() {
+  if(!playerName) return;
+  const scores = getScores();
+  scores.push({name:playerName, score, total:questions.length, mode, lang, date:Date.now()});
+  scores.sort((a,b)=>b.score-a.score);
+  localStorage.setItem('gq_scores', JSON.stringify(scores.slice(0,200)));
+  try {
+    await db.collection('scores').add({
+      name:playerName, score, total:questions.length,
+      mode, lang, date:firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e) { console.log('Firebase:', e); }
+}
+
+function openLeaderboard() {
+  const t = T[lang];
+  document.getElementById('lb-title').textContent = t.lbTitle;
+  document.getElementById('tab-all').textContent = t.tabAll;
+  document.getElementById('tab-cap').textContent = t.tabCap;
+  document.getElementById('tab-dra').textContent = t.tabDra;
+  document.getElementById('tab-wil').textContent = t.tabWil;
+  document.getElementById('leader-overlay').classList.add('show');
+  renderLeaderboard();
+}
+function closeLeaderboard() { document.getElementById('leader-overlay').classList.remove('show'); }
+function switchTab(tab, btn) {
+  lbTab=tab;
+  document.querySelectorAll('.ltab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeaderboard();
+}
+async function renderLeaderboard() {
+  const t = T[lang];
+  const list = document.getElementById('lb-list');
+  list.innerHTML = '<div class="leader-empty">⏳ Chargement...</div>';
+  try {
+    let q = db.collection('scores').orderBy('score','desc').limit(100);
+    if(lbTab!=='all') q = q.where('mode','==',lbTab);
+    const snap = await q.get();
+    let top = [];
+    snap.forEach(d => top.push(d.data()));
+    if(!top.length) { let l=getScores(); if(lbTab!=='all') l=l.filter(s=>s.mode===lbTab); top=l.sort((a,b)=>b.score-a.score).slice(0,50); }
+    if(!top.length){list.innerHTML=`<div class="leader-empty">${t.lbEmpty}</div>`;return;}
+    list.innerHTML=top.map((s,i)=>{
+      const rc=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+      const rd=i<3?['🥇','🥈','🥉'][i]:(i+1);
+      const isMe=s.name===playerName;
+      const ml={capitales:t.tabCap,drapeaux:t.tabDra,wilayas:t.tabWil,mix:'Mix'}[s.mode]||s.mode;
+      return `<div class="leader-row${isMe?' me':''}"><div class="rank-num ${rc}">${rd}</div><div class="rank-name">${s.name}${isMe?` <small style="color:var(--accent);font-size:.7rem">${t.you}</small>`:''}</div><div class="rank-mode">${ml}</div><div class="rank-score">${s.score}/${s.total}</div></div>`;
+    }).join('');
+  } catch(e) {
+    let scores=getScores(); if(lbTab!=='all') scores=scores.filter(s=>s.mode===lbTab);
+    scores.sort((a,b)=>b.score-a.score); const top=scores.slice(0,50);
+    if(!top.length){list.innerHTML=`<div class="leader-empty">${t.lbEmpty}</div>`;return;}
+    list.innerHTML=top.map((s,i)=>{const rc=i===0?'gold':i===1?'silver':i===2?'bronze':'';const rd=i<3?['🥇','🥈','🥉'][i]:(i+1);const isMe=s.name===playerName;const ml={capitales:t.tabCap,drapeaux:t.tabDra,wilayas:t.tabWil,mix:'Mix'}[s.mode]||s.mode;return `<div class="leader-row${isMe?' me':''}"><div class="rank-num ${rc}">${rd}</div><div class="rank-name">${s.name}</div><div class="rank-mode">${ml}</div><div class="rank-score">${s.score}/${s.total}</div></div>`;}).join('');
+  }
+}
+
+// ===== RESTART =====
+function restart() {
+  current=0; score=0; streak=0; bestStreak=0;
+  questions=buildQuestions();
+  document.getElementById('score').textContent='0';
+  document.getElementById('streak').textContent='0🔥';
+  document.getElementById('quiz-area').style.display='block';
+  document.getElementById('result-screen').className='result-screen';
+  const bestKey='gq_best_'+mode;
+  document.getElementById('best').textContent=localStorage.getItem(bestKey)||'0';
+  loadQuestion();
+}
+</script>
+<!-- PWA Install Banner -->
+<div id="install-banner" style="display:none;position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:#1a2235;border:1.5px solid rgba(0,229,255,0.3);border-radius:16px;padding:1rem 1.2rem;z-index:200;width:calc(100% - 2rem);max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.4);font-family:Mulish,sans-serif;align-items:center;gap:.8rem;">
+  <span style="font-size:2rem;">📱</span>
+  <div style="flex:1;"><div style="font-weight:700;color:#f0f4ff;font-size:.9rem;">Installer GéoQuiz</div><div style="color:#8896b3;font-size:.78rem;">Joue hors-ligne comme une vraie app !</div></div>
+  <button onclick="installApp()" style="background:linear-gradient(135deg,#00e5ff,#a78bfa);color:#0a0f1e;border:none;border-radius:10px;padding:.5rem 1rem;font-weight:700;font-size:.85rem;cursor:pointer;">Installer</button>
+  <button onclick="document.getElementById('install-banner').style.display='none'" style="background:none;border:none;color:#8896b3;font-size:1.2rem;cursor:pointer;">✕</button>
+</div>
+<footer style="text-align:center;padding:1rem 1rem 2rem;position:relative;z-index:1;">
+  <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:100px;padding:.4rem 1.2rem;">
+    <span style="font-size:.82rem;color:#8896b3;">© 2026 S. Boudjaidi</span><span>🇩🇿</span>
+  </div>
+</footer>
+<script>
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;setTimeout(()=>{const b=document.getElementById('install-banner');if(b)b.style.display='flex';},4000);});
+function installApp(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{document.getElementById('install-banner').style.display='none';deferredPrompt=null;});}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(()=>console.log('✅ GéoQuiz PWA')).catch(e=>console.log('SW:',e));});}
+</script>
+</body>
+</html>
