@@ -1,6 +1,6 @@
-# 🌍 GéoQuiz — Quiz Mondial & Algérie
+# 🌍 GéoQuiz — Quiz Mondial
 
-> **Teste tes connaissances en géographie mondiale et algérienne !**
+> **Teste tes connaissances en géographie mondiale !**
 > Disponible en **Français 🇫🇷**, **Arabe 🇩🇿** et **Anglais 🇬🇧**
 
 ---
