@@ -998,5 +998,35 @@ window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dP=e;setTim
 function installApp(){if(!dP)return;dP.prompt();dP.userChoice.then(()=>{document.getElementById("pwa-banner").style.display="none";dP=null;});}
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 </script>
+  
+<script>
+/* Gestion de la mise à jour automatique GéoQuiz */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+            // Vérifie s'il y a une mise à jour sur le serveur GitHub
+            reg.update();
+
+            // Écoute le message "UPDATE_AVAILABLE" envoyé par votre sw.js
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+                    console.log("Mise à jour détectée : v" + event.data.version);
+                    // On force le rechargement pour charger la nouvelle version immédiatement
+                    window.location.reload();
+                }
+            });
+        });
+    });
+
+    // Sécurité : si le nouveau service worker prend le contrôle, on rafraîchit
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+            window.location.reload();
+            refreshing = true;
+        }
+    });
+}
+</script>  
 </body>
 </html>
