@@ -1,0 +1,1002 @@
+<!--
+  © 2026 S. Boudjaidi — Tous droits réservés
+-->
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GéoQuiz — Monde & Algérie</title>
+<meta name="theme-color" content="#00e5ff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Mulish:wght@300;400;600;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyAdSfqt_xB3vKevjehY-QkhjKhud7HYH9k",authDomain:"geoquiz-42134.firebaseapp.com",projectId:"geoquiz-42134",storageBucket:"geoquiz-42134.firebasestorage.app",messagingSenderId:"700656103927",appId:"1:700656103927:web:c0f6c6986fa162072b3ef2"};
+try{firebase.initializeApp(firebaseConfig);var db=firebase.firestore();}catch(e){var db=null;}
+</script>
+<style>
+:root{
+  --bg:#0a0f1e;--card:#111827;--card2:#1a2235;
+  --accent:#00e5ff;--accent3:#a78bfa;--accent2:#ff6b35;
+  --gold:#ffd700;--text:#f0f4ff;--muted:#8896b3;
+  --success:#22c55e;--error:#ef4444;--border:rgba(0,229,255,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:"Mulish",sans-serif;min-height:100vh;overflow-x:hidden;}
+body.ar{font-family:"Noto Sans Arabic","Mulish",sans-serif;}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 20%,rgba(0,229,255,0.06),transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(167,139,250,0.06),transparent 60%);pointer-events:none;z-index:0;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ===== SCREENS — toutes cachées par défaut ===== */
+.screen{display:none !important;min-height:100vh;position:relative;z-index:1;}
+.screen.active{display:flex !important;flex-direction:column;animation:fadeUp .4s ease;}
+
+/* Écrans centrés */
+.screen-centered{align-items:center;justify-content:center;text-align:center;padding:2rem 1rem;}
+
+/* ===== TOP BAR ===== */
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;position:sticky;top:0;background:rgba(10,15,30,0.95);backdrop-filter:blur(12px);z-index:50;border-bottom:1px solid var(--border);}
+.top-bar-left{display:flex;align-items:center;gap:.5rem;}
+.top-bar-right{display:flex;align-items:center;gap:.4rem;}
+.tb-btn{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:.4rem .7rem;font-size:.8rem;font-weight:600;cursor:pointer;font-family:"Mulish",sans-serif;transition:all .2s;white-space:nowrap;}
+.tb-btn:hover{background:rgba(0,229,255,0.1);border-color:var(--accent);}
+.tb-logo{font-family:"Syne",sans-serif;font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.tb-pseudo{font-size:.75rem;color:var(--muted);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ===== LANG SCREEN ===== */
+.lang-logo{font-family:"Syne",sans-serif;font-size:clamp(2.5rem,8vw,4rem);font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent3),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem;}
+.lang-sub{color:var(--muted);font-size:.82rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:2.5rem;}
+.lang-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;}
+.lang-card{background:var(--card);border:2px solid var(--border);border-radius:20px;cursor:pointer;transition:all .25s;text-align:center;width:120px;height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;user-select:none;}
+.lang-card:hover,.lang-card:active{border-color:var(--accent);transform:translateY(-4px);}
+.lang-card span{pointer-events:none;}
+.lc-flag{font-size:2.8rem;line-height:1;display:block;}
+.lc-name{font-family:"Syne",sans-serif;font-size:.95rem;font-weight:700;display:block;}
+
+/* ===== NAME SCREEN ===== */
+.name-icon{font-size:3rem;margin-bottom:.5rem;}
+.name-title{font-family:"Syne",sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:.4rem;}
+.name-sub{color:var(--muted);margin-bottom:1.8rem;font-size:.9rem;}
+.name-input{background:var(--card);border:2px solid var(--border);color:var(--text);border-radius:14px;padding:1rem 1.4rem;font-size:1.1rem;font-family:"Mulish",sans-serif;width:100%;max-width:340px;outline:none;transition:border .2s;}
+.name-input:focus{border-color:var(--accent);}
+body.ar .name-input{text-align:right;}
+.name-btn{margin-top:.9rem;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#0a0f1e;border:none;border-radius:14px;padding:.95rem;font-size:1.05rem;font-weight:800;cursor:pointer;font-family:"Syne",sans-serif;width:100%;max-width:340px;transition:opacity .2s;}
+.name-btn:hover{opacity:.9;}
+.name-skip{margin-top:.7rem;color:var(--muted);font-size:.83rem;cursor:pointer;text-decoration:underline;}
+
+/* ===== MENU ===== */
+.menu-scroll{flex:1;overflow-y:auto;padding:1rem;}
+.menu-header{font-family:"Syne",sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:.8rem;}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.menu-card{background:var(--card);border:2px solid var(--border);border-radius:18px;padding:1.4rem .8rem;cursor:pointer;transition:all .25s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.5rem;min-height:135px;justify-content:center;user-select:none;}
+.menu-card:hover,.menu-card:active{transform:translateY(-3px);border-color:var(--accent);}
+.menu-card span{pointer-events:none;}
+.mc-icon{font-size:2.5rem;line-height:1;display:block;}
+.mc-title{font-family:"Syne",sans-serif;font-size:.95rem;font-weight:700;display:block;}
+.mc-desc{font-size:.72rem;color:var(--muted);display:block;}
+.menu-card.c1{border-color:rgba(0,229,255,.25);}
+.menu-card.c2{border-color:rgba(255,107,53,.25);}
+.menu-card.c3{border-color:rgba(167,139,250,.25);}
+.menu-card.c4{border-color:rgba(253,224,71,.25);}
+.menu-card.c5{border-color:rgba(34,197,94,.25);}
+.menu-card.cmix{grid-column:1/-1;min-height:110px;flex-direction:row;gap:1rem;justify-content:center;padding:1.2rem;}
+.menu-card.cmix .mc-icon{font-size:2.2rem;}
+
+/* ===== COUNTRY SELECT ===== */
+.country-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;padding:1rem;}
+.country-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:1rem;cursor:pointer;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.4rem;user-select:none;}
+.country-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.country-card span{pointer-events:none;}
+
+/* ===== QUIZ ===== */
+.quiz-body{flex:1;overflow-y:auto;padding-bottom:1rem;}
+.quiz-progress-bar{background:rgba(255,255,255,.08);border-radius:100px;height:5px;margin:.8rem 1rem .4rem;}
+.quiz-progress-fill{background:linear-gradient(90deg,var(--accent),var(--accent3));height:5px;border-radius:100px;transition:width .4s;}
+.quiz-progress-text{text-align:center;font-size:.75rem;color:var(--muted);margin-bottom:.6rem;}
+.score-bar{display:flex;justify-content:center;gap:1.5rem;padding:.4rem 1rem;background:rgba(255,255,255,.02);border-radius:12px;margin:0 1rem .7rem;}
+.score-item{text-align:center;}
+.score-val{font-family:"Syne",sans-serif;font-size:1.2rem;font-weight:800;color:var(--accent);}
+.score-lbl{font-size:.68rem;color:var(--muted);}
+.question-card{background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:1.3rem;margin:0 1rem .7rem;text-align:center;}
+.cat-tag{display:inline-block;padding:.2rem .7rem;border-radius:100px;font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:.7rem;background:rgba(0,229,255,.1);color:var(--accent);}
+.visual-big{font-size:7rem;line-height:1;margin:.3rem 0;display:block;}
+.map-svg{width:100%;max-width:280px;height:200px;margin:.2rem auto;display:block;}
+.map-img{width:120px;height:120px;object-fit:contain;margin:.3rem auto;display:block;filter:invert(1) sepia(1) saturate(3) hue-rotate(200deg) brightness(1.2) drop-shadow(0 0 10px rgba(167,139,250,0.6));}
+.map-svg path{fill:rgba(167,139,250,0.25);stroke:var(--accent3);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 8px rgba(167,139,250,0.5));}
+.question-text{font-family:"Syne",sans-serif;font-size:1.05rem;font-weight:700;margin:.4rem 0;line-height:1.4;}
+.hint-text{font-size:.8rem;color:var(--accent3);margin-top:.3rem;min-height:1.1rem;}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;padding:0 1rem .6rem;}
+.answer-btn{background:var(--card2);border:1.5px solid var(--border);color:var(--text);border-radius:13px;padding:.85rem .4rem;font-size:.88rem;font-weight:600;cursor:pointer;font-family:"Mulish",sans-serif;transition:all .2s;line-height:1.3;}
+.answer-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(0,229,255,.05);}
+.answer-btn.correct{background:rgba(34,197,94,.15);border-color:var(--success);color:var(--success);}
+.answer-btn.wrong{background:rgba(239,68,68,.15);border-color:var(--error);color:var(--error);}
+.feedback{text-align:center;font-size:.95rem;font-weight:700;min-height:1.4rem;margin:.1rem 0;padding:0 1rem;}
+.feedback.ok{color:var(--success);}
+.feedback.ko{color:var(--error);}
+.quiz-actions{display:flex;gap:.5rem;padding:0 1rem .4rem;justify-content:center;}
+.qa-btn{flex:1;max-width:105px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:11px;padding:.55rem .3rem;font-size:.75rem;font-weight:600;cursor:pointer;font-family:"Mulish",sans-serif;transition:all .2s;text-align:center;}
+.qa-btn:hover{border-color:var(--accent);color:var(--accent);}
+.qa-btn:disabled{opacity:.3;cursor:default;}
+.next-btn{display:none;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#0a0f1e;border:none;border-radius:13px;padding:.85rem;font-size:.95rem;font-weight:800;cursor:pointer;font-family:"Syne",sans-serif;margin:.3rem 1rem;width:calc(100% - 2rem);}
+
+/* ===== RESULT ===== */
+.copy-footer{text-align:center;padding:.6rem;color:var(--muted);font-size:.7rem;border-top:1px solid var(--border);margin-top:auto;}
+.result-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem 1rem;}
+.result-emoji{font-size:5rem;margin-bottom:.4rem;}
+.result-title{font-family:"Syne",sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:.3rem;}
+.result-score{font-size:3.5rem;font-weight:800;font-family:"Syne",sans-serif;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.result-total{font-size:.88rem;color:var(--muted);margin-bottom:.4rem;}
+.result-cumul{color:var(--accent3);font-size:.88rem;margin-bottom:1rem;}
+.result-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem;}
+.r-btn{background:var(--card2);border:1.5px solid var(--border);color:var(--text);border-radius:13px;padding:.75rem 1.1rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:"Mulish",sans-serif;transition:all .2s;}
+.r-btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent3));color:#0a0f1e;border:none;}
+
+/* ===== OVERLAY LEADERBOARD ===== */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:flex-end;justify-content:center;}
+.overlay.show{display:flex;animation:fadeIn .3s ease;}
+.overlay-box{background:#111827;border:1.5px solid var(--border);border-radius:24px 24px 0 0;padding:1.5rem 1.2rem;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;position:relative;}
+.overlay-title{font-family:"Syne",sans-serif;font-size:1.15rem;font-weight:800;text-align:center;margin-bottom:.9rem;}
+.overlay-close{position:absolute;top:.9rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;}
+.lb-tabs{display:flex;gap:.35rem;margin-bottom:.9rem;overflow-x:auto;padding-bottom:.2rem;}
+.lb-tab{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:9px;padding:.35rem .75rem;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.lb-tab.active{background:rgba(0,229,255,.1);border-color:var(--accent);color:var(--accent);}
+.lb-row{display:flex;align-items:center;gap:.7rem;padding:.65rem .4rem;border-bottom:1px solid rgba(255,255,255,.04);}
+.lb-rank{font-family:"Syne",sans-serif;font-weight:800;font-size:.95rem;min-width:2rem;text-align:center;}
+.lb-rank.gold{color:var(--gold);}
+.lb-rank.silver{color:#c0c0c0;}
+.lb-rank.bronze{color:#cd7f32;}
+.lb-name{flex:1;font-weight:700;font-size:.88rem;}
+.lb-name.me{color:var(--accent);}
+.lb-pts{font-family:"Syne",sans-serif;font-weight:800;color:var(--accent3);font-size:.9rem;}
+.lb-mode{font-size:.68rem;color:var(--muted);}
+.lb-empty{text-align:center;color:var(--muted);padding:2rem;}
+
+/* ===== MODALS ===== */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;align-items:center;justify-content:center;}
+.modal.show{display:flex;animation:fadeIn .3s ease;}
+.modal-box{background:#111827;border:1.5px solid var(--border);border-radius:22px;padding:1.8rem 1.4rem;width:92%;max-width:350px;text-align:center;}
+.modal-title{font-family:"Syne",sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:1.1rem;}
+.modal-input{background:var(--bg);border:2px solid var(--border);color:var(--text);border-radius:11px;padding:.85rem 1.1rem;font-size:1rem;font-family:"Mulish",sans-serif;width:100%;outline:none;margin-bottom:.9rem;transition:border .2s;}
+.modal-input:focus{border-color:var(--accent);}
+body.ar .modal-input{text-align:right;}
+.modal-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#0a0f1e;border:none;border-radius:11px;padding:.85rem;font-size:.97rem;font-weight:800;cursor:pointer;font-family:"Syne",sans-serif;margin-bottom:.5rem;}
+.modal-cancel{color:var(--muted);font-size:.82rem;cursor:pointer;text-decoration:underline;display:block;}
+.lang-opt{display:flex;align-items:center;gap:.9rem;padding:.85rem .9rem;border-radius:13px;cursor:pointer;border:1.5px solid var(--border);margin-bottom:.55rem;transition:all .2s;user-select:none;}
+.lang-opt:hover,.lang-opt.selected{border-color:var(--accent);background:rgba(0,229,255,.06);}
+.lang-opt span{pointer-events:none;}
+.lo-flag{font-size:1.7rem;min-width:2rem;}
+.lo-name{font-weight:700;font-size:.92rem;text-align:left;}
+.lo-native{font-size:.75rem;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<!-- ===== SCREEN LANGUE ===== -->
+<div id="screen-lang" class="screen screen-centered active">
+  <div class="lang-logo">🌍 GéoQuiz</div>
+  <p class="lang-sub">Choisis ta langue</p>
+  <div class="lang-grid">
+    <div class="lang-card" onclick="chooseLang('fr')">
+      <span class="lc-flag">🇫🇷</span><span class="lc-name">Français</span>
+    </div>
+    <div class="lang-card" onclick="chooseLang('ar')">
+      <span class="lc-flag">🇩🇿</span><span class="lc-name">العربية</span>
+    </div>
+    <div class="lang-card" onclick="chooseLang('en')">
+      <span class="lc-flag">🇬🇧</span><span class="lc-name">English</span>
+    </div>
+  </div>
+  <p style="color:var(--muted);font-size:.75rem;margin-top:2rem;">© 2026 S. Boudjaidi 🇩🇿</p>
+</div>
+
+<!-- ===== SCREEN PSEUDO ===== -->
+<div id="screen-name" class="screen screen-centered">
+  <div class="name-icon">👤</div>
+  <div class="name-title" id="name-title">Ton pseudo ?</div>
+  <div class="name-sub" id="name-sub">Il apparaîtra dans le classement mondial</div>
+  <input type="text" class="name-input" id="name-input" maxlength="20" placeholder="Ton pseudo...">
+  <button class="name-btn" id="name-btn" onclick="submitName()">Commencer !</button>
+  <span class="name-skip" id="name-skip" onclick="skipName()">Passer sans pseudo</span>
+</div>
+
+<!-- ===== SCREEN MENU ===== -->
+<div id="screen-menu" class="screen">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="tb-logo">🌍 GéoQuiz</span>
+      <span class="tb-pseudo" id="tb-pseudo"></span>
+    </div>
+    <div class="top-bar-right">
+      <button class="tb-btn" onclick="openLbOverlay()">🏆</button>
+      <button class="tb-btn" id="tb-lang-btn" onclick="openLangModal()">🌐 FR</button>
+      <button class="tb-btn" onclick="openPseudoModal()">✏️</button>
+    </div>
+  </div>
+  <div class="menu-scroll">
+    <div class="menu-header" id="menu-title">Choisis un mode</div>
+    <div class="menu-grid">
+      <div class="menu-card c1" onclick="startQuiz('capitales')">
+        <span class="mc-icon">🏛️</span><span class="mc-title" id="mc-cap">Capitales</span><span class="mc-desc" id="mc-cap-d">Trouve la capitale</span>
+      </div>
+      <div class="menu-card c2" onclick="startQuiz('drapeaux')">
+        <span class="mc-icon">🚩</span><span class="mc-title" id="mc-dra">Drapeaux</span><span class="mc-desc" id="mc-dra-d">Identifie le pays</span>
+      </div>
+      <div class="menu-card c3" onclick="startQuiz('carte')">
+        <span class="mc-icon">🗺️</span><span class="mc-title" id="mc-carte">Carte</span><span class="mc-desc" id="mc-carte-d">Devine le pays</span>
+      </div>
+      <div class="menu-card c4" onclick="showCountrySelect()">
+        <span class="mc-icon">🏙️</span><span class="mc-title" id="mc-wil">Wilayas</span><span class="mc-desc" id="mc-wil-d">Quiz wilayas</span>
+      </div>
+
+      <div class="menu-card cmix" onclick="startQuiz('mix')" style="min-height:110px;">
+        <span class="mc-icon">🎲</span><span class="mc-title" id="mc-mix">Mix aléatoire</span><span class="mc-desc" id="mc-mix-d">Mélange de tous les modes</span>
+      </div>
+    </div>
+  </div>
+  <div class="copy-footer">© 2026 S. Boudjaidi 🇩🇿</div>
+</div>
+
+<!-- ===== SCREEN PAYS (Wilayas) ===== -->
+<div id="screen-country" class="screen">
+  <div class="top-bar">
+    <button class="tb-btn" onclick="showScreen('screen-menu')">← Retour</button>
+    <span style="font-family:Syne,sans-serif;font-weight:700;" id="cs-title">Choisir un pays</span>
+    <div style="width:60px;"></div>
+  </div>
+  <div style="padding:.8rem 1rem .3rem;color:var(--muted);font-size:.82rem;" id="cs-sub">Sélectionne un pays</div>
+  <div class="country-grid" id="country-grid"></div>
+</div>
+
+<!-- ===== SCREEN QUIZ ===== -->
+<div id="screen-quiz" class="screen">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <button class="tb-btn" onclick="goBackMenu()">← Menu</button>
+      <span class="tb-pseudo" id="tb-pseudo-quiz"></span>
+    </div>
+    <div class="top-bar-right">
+      <button class="tb-btn" onclick="openLbOverlay()">🏆</button>
+      <button class="tb-btn" id="quiz-lang-btn" onclick="openLangModal()">🌐 FR</button>
+      <button class="tb-btn" onclick="openPseudoModal()">✏️</button>
+    </div>
+  </div>
+  <!-- QUIZ AREA -->
+  <div class="quiz-body" id="quiz-area">
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="quiz-progress-text" id="progress-text">1 / 10</div>
+    <div class="score-bar">
+      <div class="score-item"><div class="score-val" id="score">0</div><div class="score-lbl" id="lbl-score">Score</div></div>
+      <div class="score-item"><div class="score-val" id="streak">0🔥</div><div class="score-lbl" id="lbl-streak">Série</div></div>
+      <div class="score-item"><div class="score-val" id="total-pts">0</div><div class="score-lbl" id="lbl-total">Total</div></div>
+    </div>
+    <div class="question-card">
+      <div class="cat-tag" id="cat-tag"></div>
+      <div id="visual-display"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="hint-text" id="hint-text"></div>
+    </div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="quiz-actions">
+      <button class="qa-btn" id="btn-back" onclick="prevQuestion()">⬅️ Retour</button>
+      <button class="qa-btn" id="btn-aide" onclick="showAide()">💡 Aide</button>
+      <button class="qa-btn" id="btn-passer" onclick="passerQuestion()">⏭️ Passer</button>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Suivant →</button>
+  </div>
+  <!-- RESULT -->
+  <div class="result-wrap" id="result-area" style="display:none;">
+    <div class="result-emoji" id="result-emoji">🏆</div>
+    <div class="result-title" id="result-title">Bravo !</div>
+    <div class="result-score" id="result-score">8</div>
+    <div class="result-total" id="result-total">/ 10 correctes</div>
+    <div class="result-cumul" id="result-cumul"></div>
+    <div class="result-btns">
+      <button class="r-btn primary" id="r-rejouer" onclick="restartQuiz()">🔄 Rejouer</button>
+      <button class="r-btn" id="r-menu" onclick="showScreen('screen-menu')">🏠 Menu</button>
+      <button class="r-btn" id="r-lb" onclick="openLbOverlay()">🏆 Classement</button>
+    </div>
+    <p style="color:var(--muted);font-size:.68rem;margin-top:1.2rem;">© 2026 S. Boudjaidi 🇩🇿</p>
+  </div>
+</div>
+
+<!-- ===== OVERLAY CLASSEMENT ===== -->
+<div class="overlay" id="lb-overlay" onclick="if(event.target===this)closeLbOverlay()">
+  <div class="overlay-box">
+    <button class="overlay-close" onclick="closeLbOverlay()">✕</button>
+    <div class="overlay-title" id="lb-title">🏆 Classement Mondial</div>
+    <div class="lb-tabs">
+      <div class="lb-tab active" onclick="switchLbTab('all',this)">Tous</div>
+      <div class="lb-tab" onclick="switchLbTab('capitales',this)">Capitales</div>
+      <div class="lb-tab" onclick="switchLbTab('drapeaux',this)">Drapeaux</div>
+      <div class="lb-tab" onclick="switchLbTab('carte',this)">Carte</div>
+      <div class="lb-tab" onclick="switchLbTab('wilayas',this)">Wilayas</div>
+      <div class="lb-tab" onclick="switchLbTab('mix',this)">Mix</div>
+    </div>
+    <div id="lb-list"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL PSEUDO ===== -->
+<div class="modal" id="modal-pseudo">
+  <div class="modal-box">
+    <div class="modal-title" id="mp-title">✏️ Changer le pseudo</div>
+    <input type="text" class="modal-input" id="mp-input" maxlength="20">
+    <button class="modal-btn" id="mp-save" onclick="savePseudo()">Sauvegarder</button>
+    <span class="modal-cancel" onclick="closeModal('modal-pseudo')">Annuler</span>
+  </div>
+</div>
+
+<!-- ===== MODAL LANGUE ===== -->
+<div class="modal" id="modal-lang">
+  <div class="modal-box">
+    <div class="modal-title">🌐 Changer la langue</div>
+    <div class="lang-opt" id="lo-fr" onclick="switchLang('fr')">
+      <span class="lo-flag">🇫🇷</span><div><div class="lo-name">Français</div><div class="lo-native">French</div></div>
+    </div>
+    <div class="lang-opt" id="lo-ar" onclick="switchLang('ar')">
+      <span class="lo-flag">🇩🇿</span><div><div class="lo-name">العربية</div><div class="lo-native">Arabic</div></div>
+    </div>
+    <div class="lang-opt" id="lo-en" onclick="switchLang('en')">
+      <span class="lo-flag">🇬🇧</span><div><div class="lo-name">English</div><div class="lo-native">English</div></div>
+    </div>
+    <span class="modal-cancel" onclick="closeModal('modal-lang')" style="margin-top:.4rem;">✕ Fermer</span>
+  </div>
+</div>
+
+<!-- ===== MODAL AIDE ===== -->
+<div class="modal" id="modal-aide">
+  <div class="modal-box">
+    <div class="modal-title">💡 Indice</div>
+    <p id="aide-text" style="color:var(--muted);font-size:.93rem;line-height:1.6;margin-bottom:1.1rem;"></p>
+    <button class="modal-btn" onclick="closeModal('modal-aide')">OK</button>
+  </div>
+</div>
+
+<!-- ===== PWA BANNER ===== -->
+<div id="pwa-banner" style="display:none;position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:#1a2235;border:1.5px solid rgba(0,229,255,.3);border-radius:14px;padding:.9rem 1rem;z-index:100;width:calc(100% - 2rem);max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.4);align-items:center;gap:.7rem;">
+  <span style="font-size:1.6rem;">📱</span>
+  <div style="flex:1;"><div style="font-weight:700;font-size:.85rem;">Installer GéoQuiz</div><div style="color:#8896b3;font-size:.73rem;">Joue hors-ligne !</div></div>
+  <button onclick="installApp()" style="background:linear-gradient(135deg,#00e5ff,#a78bfa);color:#0a0f1e;border:none;border-radius:9px;padding:.4rem .85rem;font-weight:700;font-size:.8rem;cursor:pointer;">Installer</button>
+  <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:#8896b3;font-size:1rem;cursor:pointer;">✕</button>
+</div>
+
+<script>
+/* © 2026 S. Boudjaidi */
+
+// ===== TRANSLATIONS =====
+const T={
+  fr:{nameTit:"Ton pseudo ?",nameSub:"Il apparaîtra dans le classement mondial",namePh:"Ton pseudo...",nameBtn:"Commencer !",nameSkip:"Passer sans pseudo",menuTitle:"Choisis un mode",mcCap:"Capitales",mcCapD:"Trouve la capitale",mcDra:"Drapeaux",mcDraD:"Identifie le pays",mcCarte:"Carte",mcCarteD:"Devine le pays",mcWil:"Wilayas",mcWilD:"Quiz wilayas",mcPays:"Pays du monde",mcPaysD:"Reconnais le pays",mcMix:"Mix aléatoire",mcMixD:"Mélange de tous",csTitle:"Choisir un pays",csSub:"Sélectionne un pays",qCap:"Quelle est la capitale de",qDra:"Quel pays possède ce drapeau ?",qCarte:"Quel pays est sur cette carte ?",qPays:"À quel pays appartient ce drapeau ?",qWil:"Quelle est la wilaya numéro",score:"Score",streak:"Série",total:"Total",lbTitle:"🏆 Classement Mondial",lbEmpty:"Pas encore de scores !",btnBack:"⬅️ Retour",btnAide:"💡 Aide",btnPasser:"⏭️ Passer",mpTitle:"✏️ Changer le pseudo",mpSave:"Sauvegarder",resultGood:"Excellent ! 🎉",resultOk:"Bien joué ! 👍",resultBad:"Continue à t'entraîner 💪",resultTotal:"/ 10 correctes",resultCumul:"Total cumulé :",rRejouer:"🔄 Rejouer",rMenu:"🏠 Menu",rLb:"🏆 Classement",aideText:"Réfléchis bien... élimine les mauvaises réponses !",langBtn:"🌐 FR",you:"(toi)",wilaya:"Wilaya",player:"Joueur"},
+  ar:{nameTit:"اسمك المستعار؟",nameSub:"سيظهر في التصنيف العالمي",namePh:"اسمك المستعار...",nameBtn:"ابدأ!",nameSkip:"تخطي بدون اسم",menuTitle:"اختر وضعاً",mcCap:"العواصم",mcCapD:"اعثر على العاصمة",mcDra:"الأعلام",mcDraD:"تعرف على البلد",mcCarte:"الخريطة",mcCarteD:"خمن البلد",mcWil:"الولايات",mcWilD:"اختبار الولايات",mcPays:"دول العالم",mcPaysD:"تعرف على البلد",mcMix:"مزيج عشوائي",mcMixD:"مزيج من كل الأوضاع",csTitle:"اختر دولة",csSub:"اختر دولة",qCap:"ما هي عاصمة",qDra:"لأي بلد ينتمي هذا العلم؟",qCarte:"ما البلد في هذه الخريطة؟",qPays:"لأي بلد ينتمي هذا العلم؟",qWil:"ما هي الولاية رقم",score:"النقاط",streak:"سلسلة",total:"المجموع",lbTitle:"🏆 التصنيف العالمي",lbEmpty:"لا توجد نقاط بعد!",btnBack:"⬅️ رجوع",btnAide:"💡 مساعدة",btnPasser:"⏭️ تخطي",mpTitle:"✏️ تغيير الاسم",mpSave:"حفظ",resultGood:"ممتاز! 🎉",resultOk:"أحسنت! 👍",resultBad:"واصل التدريب 💪",resultTotal:"/ 10 صحيحة",resultCumul:"المجموع التراكمي:",rRejouer:"🔄 إعادة",rMenu:"🏠 القائمة",rLb:"🏆 التصنيف",aideText:"فكر جيداً!",langBtn:"🌐 عر",you:"(أنت)",wilaya:"ولاية",player:"لاعب"},
+  en:{nameTit:"Your username?",nameSub:"It will appear in the world ranking",namePh:"Your username...",nameBtn:"Start!",nameSkip:"Skip without username",menuTitle:"Choose a mode",mcCap:"Capitals",mcCapD:"Find the capital",mcDra:"Flags",mcDraD:"Identify the country",mcCarte:"Map",mcCarteD:"Guess the country",mcWil:"Wilayas",mcWilD:"Wilayas quiz",mcPays:"World countries",mcPaysD:"Recognize the country",mcMix:"Random mix",mcMixD:"Mix of all modes",csTitle:"Choose a country",csSub:"Select a country",qCap:"What is the capital of",qDra:"Which country has this flag?",qCarte:"Which country is on this map?",qPays:"Which country does this flag belong to?",qWil:"What is wilaya number",score:"Score",streak:"Streak",total:"Total",lbTitle:"🏆 World Ranking",lbEmpty:"No scores yet!",btnBack:"⬅️ Back",btnAide:"💡 Hint",btnPasser:"⏭️ Skip",mpTitle:"✏️ Change username",mpSave:"Save",resultGood:"Excellent! 🎉",resultOk:"Well done! 👍",resultBad:"Keep practicing 💪",resultTotal:"/ 10 correct",resultCumul:"Cumulative total:",rRejouer:"🔄 Play again",rMenu:"🏠 Menu",rLb:"🏆 Ranking",aideText:"Think carefully!",langBtn:"🌐 EN",you:"(you)",wilaya:"Wilaya",player:"Player"}
+};
+
+// ===== DATA =====
+const CAPITALES=[
+  {a:{fr:"France",ar:"فرنسا",en:"France"},cap:{fr:"Paris",ar:"باريس",en:"Paris"},hint:{fr:"Tour Eiffel",ar:"برج إيفل",en:"Eiffel Tower"},w:{fr:["Madrid","Rome","Berlin"],ar:["مدريد","روما","برلين"],en:["Madrid","Rome","Berlin"]}},
+  {a:{fr:"Algérie",ar:"الجزائر",en:"Algeria"},cap:{fr:"Alger",ar:"الجزائر العاصمة",en:"Algiers"},hint:{fr:"Pas Oran !",ar:"ليست وهران!",en:"Not Oran!"},w:{fr:["Oran","Tunis","Rabat"],ar:["وهران","تونس","الرباط"],en:["Oran","Tunis","Rabat"]}},
+  {a:{fr:"Maroc",ar:"المغرب",en:"Morocco"},cap:{fr:"Rabat",ar:"الرباط",en:"Rabat"},hint:{fr:"Pas Casablanca !",ar:"ليست الدار البيضاء!",en:"Not Casablanca!"},w:{fr:["Casablanca","Marrakech","Fès"],ar:["الدار البيضاء","مراكش","فاس"],en:["Casablanca","Marrakech","Fez"]}},
+  {a:{fr:"Tunisie",ar:"تونس",en:"Tunisia"},cap:{fr:"Tunis",ar:"تونس",en:"Tunis"},hint:{fr:"Carthage",ar:"قرطاج",en:"Carthage"},w:{fr:["Sfax","Sousse","Bizerte"],ar:["صفاقس","سوسة","بنزرت"],en:["Sfax","Sousse","Bizerte"]}},
+  {a:{fr:"Espagne",ar:"إسبانيا",en:"Spain"},cap:{fr:"Madrid",ar:"مدريد",en:"Madrid"},hint:{fr:"Pas Barcelone !",ar:"ليست برشلونة!",en:"Not Barcelona!"},w:{fr:["Barcelone","Séville","Valence"],ar:["برشلونة","إشبيلية","فالنسيا"],en:["Barcelona","Seville","Valencia"]}},
+  {a:{fr:"Italie",ar:"إيطاليا",en:"Italy"},cap:{fr:"Rome",ar:"روما",en:"Rome"},hint:{fr:"Colisée",ar:"الكولوسيوم",en:"Colosseum"},w:{fr:["Milan","Naples","Turin"],ar:["ميلانو","نابولي","تورينو"],en:["Milan","Naples","Turin"]}},
+  {a:{fr:"Allemagne",ar:"ألمانيا",en:"Germany"},cap:{fr:"Berlin",ar:"برلين",en:"Berlin"},hint:{fr:"Pas Munich !",ar:"ليست ميونخ!",en:"Not Munich!"},w:{fr:["Munich","Hambourg","Cologne"],ar:["ميونخ","هامبورغ","كولونيا"],en:["Munich","Hamburg","Cologne"]}},
+  {a:{fr:"Royaume-Uni",ar:"المملكة المتحدة",en:"United Kingdom"},cap:{fr:"Londres",ar:"لندن",en:"London"},hint:{fr:"Big Ben",ar:"بيغ بن",en:"Big Ben"},w:{fr:["Manchester","Birmingham","Leeds"],ar:["مانشستر","برمنغهام","ليدز"],en:["Manchester","Birmingham","Leeds"]}},
+  {a:{fr:"États-Unis",ar:"الولايات المتحدة",en:"United States"},cap:{fr:"Washington",ar:"واشنطن",en:"Washington"},hint:{fr:"Pas New York !",ar:"ليست نيويورك!",en:"Not New York!"},w:{fr:["New York","Los Angeles","Chicago"],ar:["نيويورك","لوس أنجلوس","شيكاغو"],en:["New York","Los Angeles","Chicago"]}},
+  {a:{fr:"Japon",ar:"اليابان",en:"Japan"},cap:{fr:"Tokyo",ar:"طوكيو",en:"Tokyo"},hint:{fr:"Mont Fuji",ar:"جبل فوجي",en:"Mount Fuji"},w:{fr:["Osaka","Kyoto","Hiroshima"],ar:["أوساكا","كيوتو","هيروشيما"],en:["Osaka","Kyoto","Hiroshima"]}},
+  {a:{fr:"Chine",ar:"الصين",en:"China"},cap:{fr:"Pékin",ar:"بكين",en:"Beijing"},hint:{fr:"Cité interdite",ar:"المدينة المحرمة",en:"Forbidden City"},w:{fr:["Shanghai","Hong Kong","Canton"],ar:["شنغهاي","هونغ كونغ","غوانغتشو"],en:["Shanghai","Hong Kong","Guangzhou"]}},
+  {a:{fr:"Brésil",ar:"البرازيل",en:"Brazil"},cap:{fr:"Brasilia",ar:"برازيليا",en:"Brasilia"},hint:{fr:"Pas Rio !",ar:"ليست ريو!",en:"Not Rio!"},w:{fr:["São Paulo","Rio de Janeiro","Salvador"],ar:["ساو باولو","ريو دي جانيرو","سالفادور"],en:["São Paulo","Rio de Janeiro","Salvador"]}},
+  {a:{fr:"Australie",ar:"أستراليا",en:"Australia"},cap:{fr:"Canberra",ar:"كانبيرا",en:"Canberra"},hint:{fr:"Pas Sydney !",ar:"ليست سيدني!",en:"Not Sydney!"},w:{fr:["Sydney","Melbourne","Brisbane"],ar:["سيدني","ملبورن","بريزبين"],en:["Sydney","Melbourne","Brisbane"]}},
+  {a:{fr:"Canada",ar:"كندا",en:"Canada"},cap:{fr:"Ottawa",ar:"أوتاوا",en:"Ottawa"},hint:{fr:"Pas Toronto !",ar:"ليست تورونتو!",en:"Not Toronto!"},w:{fr:["Toronto","Montréal","Vancouver"],ar:["تورونتو","مونتريال","فانكوفر"],en:["Toronto","Montreal","Vancouver"]}},
+  {a:{fr:"Russie",ar:"روسيا",en:"Russia"},cap:{fr:"Moscou",ar:"موسكو",en:"Moscow"},hint:{fr:"Place Rouge",ar:"الميدان الأحمر",en:"Red Square"},w:{fr:["Saint-Pétersbourg","Novossibirsk","Kazan"],ar:["سانت بطرسبرغ","نوفوسيبيرسك","قازان"],en:["Saint Petersburg","Novosibirsk","Kazan"]}},
+  {a:{fr:"Égypte",ar:"مصر",en:"Egypt"},cap:{fr:"Le Caire",ar:"القاهرة",en:"Cairo"},hint:{fr:"Pyramides proches",ar:"الأهرامات قريبة",en:"Pyramids nearby"},w:{fr:["Alexandrie","Gizeh","Louxor"],ar:["الإسكندرية","الجيزة","الأقصر"],en:["Alexandria","Giza","Luxor"]}},
+  {a:{fr:"Turquie",ar:"تركيا",en:"Turkey"},cap:{fr:"Ankara",ar:"أنقرة",en:"Ankara"},hint:{fr:"Pas Istanbul !",ar:"ليست إسطنبول!",en:"Not Istanbul!"},w:{fr:["Istanbul","Izmir","Bursa"],ar:["إسطنبول","إزمير","بورصة"],en:["Istanbul","Izmir","Bursa"]}},
+  {a:{fr:"Inde",ar:"الهند",en:"India"},cap:{fr:"New Delhi",ar:"نيودلهي",en:"New Delhi"},hint:{fr:"Taj Mahal",ar:"تاج محل",en:"Taj Mahal"},w:{fr:["Mumbai","Kolkata","Bangalore"],ar:["مومباي","كولكاتا","بنغالور"],en:["Mumbai","Kolkata","Bangalore"]}},
+  {a:{fr:"Argentine",ar:"الأرجنتين",en:"Argentina"},cap:{fr:"Buenos Aires",ar:"بوينس آيرس",en:"Buenos Aires"},hint:{fr:"Tango",ar:"التانغو",en:"Tango"},w:{fr:["Córdoba","Rosario","Mendoza"],ar:["قرطبة","روساريو","ميندوزا"],en:["Córdoba","Rosario","Mendoza"]}},
+  {a:{fr:"Mexique",ar:"المكسيك",en:"Mexico"},cap:{fr:"Mexico City",ar:"مكسيكو سيتي",en:"Mexico City"},hint:{fr:"Aztèques",ar:"الأزتيك",en:"Aztecs"},w:{fr:["Guadalajara","Monterrey","Puebla"],ar:["غوادالاخارا","مونتيري","بويبلا"],en:["Guadalajara","Monterrey","Puebla"]}},
+];
+const DRAPEAUX=[
+  {flag:"🇩🇿",a:{fr:"Algérie",ar:"الجزائر",en:"Algeria"},hint:{fr:"Vert blanc croissant",ar:"أخضر أبيض هلال",en:"Green white crescent"},w:{fr:["Maroc","Tunisie","Libye"],ar:["المغرب","تونس","ليبيا"],en:["Morocco","Tunisia","Libya"]}},
+  {flag:"🇫🇷",a:{fr:"France",ar:"فرنسا",en:"France"},hint:{fr:"Tricolore bleu blanc rouge",ar:"ثلاثي الألوان",en:"Blue white red"},w:{fr:["Belgique","Pays-Bas","Luxembourg"],ar:["بلجيكا","هولندا","لوكسمبورغ"],en:["Belgium","Netherlands","Luxembourg"]}},
+  {flag:"🇩🇪",a:{fr:"Allemagne",ar:"ألمانيا",en:"Germany"},hint:{fr:"Noir rouge or",ar:"أسود أحمر ذهبي",en:"Black red gold"},w:{fr:["Autriche","Belgique","Suisse"],ar:["النمسا","بلجيكا","سويسرا"],en:["Austria","Belgium","Switzerland"]}},
+  {flag:"🇯🇵",a:{fr:"Japon",ar:"اليابان",en:"Japan"},hint:{fr:"Disque rouge sur blanc",ar:"قرص أحمر على أبيض",en:"Red disc on white"},w:{fr:["Chine","Corée du Sud","Bangladesh"],ar:["الصين","كوريا الجنوبية","بنغلاديش"],en:["China","South Korea","Bangladesh"]}},
+  {flag:"🇧🇷",a:{fr:"Brésil",ar:"البرازيل",en:"Brazil"},hint:{fr:"Vert jaune bleu étoiles",ar:"أخضر أصفر أزرق نجوم",en:"Green yellow blue stars"},w:{fr:["Argentine","Colombie","Venezuela"],ar:["الأرجنتين","كولومبيا","فنزويلا"],en:["Argentina","Colombia","Venezuela"]}},
+  {flag:"🇺🇸",a:{fr:"États-Unis",ar:"الولايات المتحدة",en:"USA"},hint:{fr:"50 étoiles 13 bandes",ar:"50 نجمة 13 شريطة",en:"50 stars 13 stripes"},w:{fr:["Canada","Australie","Liberia"],ar:["كندا","أستراليا","ليبيريا"],en:["Canada","Australia","Liberia"]}},
+  {flag:"🇬🇧",a:{fr:"Royaume-Uni",ar:"المملكة المتحدة",en:"UK"},hint:{fr:"Union Jack",ar:"يونيون جاك",en:"Union Jack"},w:{fr:["Irlande","Australie","Nouvelle-Zélande"],ar:["إيرلندا","أستراليا","نيوزيلندا"],en:["Ireland","Australia","New Zealand"]}},
+  {flag:"🇨🇳",a:{fr:"Chine",ar:"الصين",en:"China"},hint:{fr:"Rouge étoiles jaunes",ar:"أحمر نجوم صفراء",en:"Red yellow stars"},w:{fr:["Vietnam","Corée du Nord","Mongolie"],ar:["فيتنام","كوريا الشمالية","منغوليا"],en:["Vietnam","North Korea","Mongolia"]}},
+  {flag:"🇸🇦",a:{fr:"Arabie Saoudite",ar:"المملكة العربية السعودية",en:"Saudi Arabia"},hint:{fr:"Vert épée et chahada",ar:"أخضر سيف وشهادة",en:"Green sword and shahada"},w:{fr:["Irak","Jordanie","Yémen"],ar:["العراق","الأردن","اليمن"],en:["Iraq","Jordan","Yemen"]}},
+  {flag:"🇲🇦",a:{fr:"Maroc",ar:"المغرب",en:"Morocco"},hint:{fr:"Rouge étoile verte",ar:"أحمر نجمة خضراء",en:"Red green star"},w:{fr:["Tunisie","Algérie","Mauritanie"],ar:["تونس","الجزائر","موريتانيا"],en:["Tunisia","Algeria","Mauritania"]}},
+  {flag:"🇹🇷",a:{fr:"Turquie",ar:"تركيا",en:"Turkey"},hint:{fr:"Rouge croissant étoile",ar:"أحمر هلال نجمة",en:"Red crescent star"},w:{fr:["Azerbaïdjan","Pakistan","Tunisie"],ar:["أذربيجان","باكستان","تونس"],en:["Azerbaijan","Pakistan","Tunisia"]}},
+  {flag:"🇪🇬",a:{fr:"Égypte",ar:"مصر",en:"Egypt"},hint:{fr:"Aigle de Saladin",ar:"نسر صلاح الدين",en:"Eagle of Saladin"},w:{fr:["Yémen","Syrie","Irak"],ar:["اليمن","سوريا","العراق"],en:["Yemen","Syria","Iraq"]}},
+  {flag:"🇮🇹",a:{fr:"Italie",ar:"إيطاليا",en:"Italy"},hint:{fr:"Vert blanc rouge vertical",ar:"أخضر أبيض أحمر عمودي",en:"Green white red vertical"},w:{fr:["France","Hongrie","Mexique"],ar:["فرنسا","هنغاريا","المكسيك"],en:["France","Hungary","Mexico"]}},
+  {flag:"🇷🇺",a:{fr:"Russie",ar:"روسيا",en:"Russia"},hint:{fr:"Blanc bleu rouge horizontal",ar:"أبيض أزرق أحمر أفقي",en:"White blue red horizontal"},w:{fr:["Serbie","Croatie","Slovaquie"],ar:["صربيا","كرواتيا","سلوفاكيا"],en:["Serbia","Croatia","Slovakia"]}},
+  {flag:"🇮🇳",a:{fr:"Inde",ar:"الهند",en:"India"},hint:{fr:"Roue Ashoka centre",ar:"عجلة أشوكا في الوسط",en:"Ashoka wheel center"},w:{fr:["Pakistan","Bangladesh","Sri Lanka"],ar:["باكستان","بنغلاديش","سريلانكا"],en:["Pakistan","Bangladesh","Sri Lanka"]}},
+];
+const CARTES=[
+  {mapKey:"japon",a:{fr:"Japon",ar:"اليابان",en:"Japan"},hint:{fr:"Archipel Asie de l Est",ar:"أرخبيل شرق آسيا",en:"East Asian archipelago"},w:{fr:["Corée du Sud","Philippines","Taïwan"],ar:["كوريا الجنوبية","الفلبين","تايوان"],en:["South Korea","Philippines","Taiwan"]}},
+  {mapKey:"algerie",a:{fr:"Algérie",ar:"الجزائر",en:"Algeria"},hint:{fr:"Plus grand pays Afrique",ar:"أكبر دول أفريقيا",en:"Largest African country"},w:{fr:["Libye","Mali","Niger"],ar:["ليبيا","مالي","النيجر"],en:["Libya","Mali","Niger"]}},
+  {mapKey:"bresil",a:{fr:"Brésil",ar:"البرازيل",en:"Brazil"},hint:{fr:"Plus grand Amérique du Sud",ar:"أكبر دول أمريكا الجنوبية",en:"Largest South America"},w:{fr:["Argentine","Colombie","Pérou"],ar:["الأرجنتين","كولومبيا","بيرو"],en:["Argentina","Colombia","Peru"]}},
+  {mapKey:"australie",a:{fr:"Australie",ar:"أستراليا",en:"Australia"},hint:{fr:"Continent-pays hémisphère sud",ar:"قارة ودولة في الجنوب",en:"Continent and country"},w:{fr:["Nouvelle-Zélande","Indonésie","Papouasie"],ar:["نيوزيلندا","إندونيسيا","بابوا"],en:["New Zealand","Indonesia","Papua"]}},
+  {mapKey:"france",a:{fr:"France",ar:"فرنسا",en:"France"},hint:{fr:"Pays hexagonal Europe Ouest",ar:"دولة سداسية غرب أوروبا",en:"Hexagonal Western Europe"},w:{fr:["Espagne","Allemagne","Italie"],ar:["إسبانيا","ألمانيا","إيطاليا"],en:["Spain","Germany","Italy"]}},
+  {mapKey:"espagne",a:{fr:"Espagne",ar:"إسبانيا",en:"Spain"},hint:{fr:"Péninsule Ibérique",ar:"شبه الجزيرة الإيبيرية",en:"Iberian Peninsula"},w:{fr:["France","Portugal","Italie"],ar:["فرنسا","البرتغال","إيطاليا"],en:["France","Portugal","Italy"]}},
+  {mapKey:"italie",a:{fr:"Italie",ar:"إيطاليا",en:"Italy"},hint:{fr:"Forme de botte",ar:"شكل الحذاء",en:"Boot shape"},w:{fr:["Grèce","Espagne","Croatie"],ar:["اليونان","إسبانيا","كرواتيا"],en:["Greece","Spain","Croatia"]}},
+  {mapKey:"egypte",a:{fr:"Égypte",ar:"مصر",en:"Egypt"},hint:{fr:"Nil et pyramides",ar:"النيل والأهرامات",en:"Nile and pyramids"},w:{fr:["Libye","Soudan","Algérie"],ar:["ليبيا","السودان","الجزائر"],en:["Libya","Sudan","Algeria"]}},
+  {mapKey:"allemagne",a:{fr:"Allemagne",ar:"ألمانيا",en:"Germany"},hint:{fr:"Coeur de l Europe",ar:"قلب أوروبا",en:"Heart of Europe"},w:{fr:["Pologne","Autriche","Belgique"],ar:["بولندا","النمسا","بلجيكا"],en:["Poland","Austria","Belgium"]}},
+  {mapKey:"russie",a:{fr:"Russie",ar:"روسيا",en:"Russia"},hint:{fr:"Plus grand pays du monde",ar:"أكبر دول العالم",en:"Largest country"},w:{fr:["Canada","Chine","États-Unis"],ar:["كندا","الصين","الولايات المتحدة"],en:["Canada","China","United States"]}},
+  {mapKey:"chine",a:{fr:"Chine",ar:"الصين",en:"China"},hint:{fr:"Grande Muraille",ar:"سور الصين العظيم",en:"Great Wall"},w:{fr:["Inde","Russie","Mongolie"],ar:["الهند","روسيا","منغوليا"],en:["India","Russia","Mongolia"]}},
+  {mapKey:"maroc",a:{fr:"Maroc",ar:"المغرب",en:"Morocco"},hint:{fr:"Royaume du Maghreb",ar:"مملكة المغرب",en:"Kingdom of Maghreb"},w:{fr:["Algérie","Tunisie","Mauritanie"],ar:["الجزائر","تونس","موريتانيا"],en:["Algeria","Tunisia","Mauritania"]}},
+  {mapKey:"tunisie",a:{fr:"Tunisie",ar:"تونس",en:"Tunisia"},hint:{fr:"Plus petit pays Maghreb",ar:"أصغر دول المغرب",en:"Smallest Maghreb country"},w:{fr:["Maroc","Algérie","Libye"],ar:["المغرب","الجزائر","ليبيا"],en:["Morocco","Algeria","Libya"]}},
+];
+const PAYS_DATA=[
+  {flag:"🇩🇿",a:{fr:"Algérie",ar:"الجزائر",en:"Algeria"},hint:{fr:"Plus grand pays Afrique",ar:"أكبر دول أفريقيا",en:"Largest African country"},w:{fr:["Maroc","Tunisie","Libye"],ar:["المغرب","تونس","ليبيا"],en:["Morocco","Tunisia","Libya"]}},
+  {flag:"🇫🇷",a:{fr:"France",ar:"فرنسا",en:"France"},hint:{fr:"Tour Eiffel",ar:"برج إيفل",en:"Eiffel Tower"},w:{fr:["Belgique","Allemagne","Espagne"],ar:["بلجيكا","ألمانيا","إسبانيا"],en:["Belgium","Germany","Spain"]}},
+  {flag:"🇯🇵",a:{fr:"Japon",ar:"اليابان",en:"Japan"},hint:{fr:"Soleil Levant",ar:"الشمس المشرقة",en:"Rising Sun"},w:{fr:["Chine","Corée","Vietnam"],ar:["الصين","كوريا","فيتنام"],en:["China","Korea","Vietnam"]}},
+  {flag:"🇧🇷",a:{fr:"Brésil",ar:"البرازيل",en:"Brazil"},hint:{fr:"Carnaval et football",ar:"الكرنفال والكرة",en:"Carnival and football"},w:{fr:["Argentine","Colombie","Chili"],ar:["الأرجنتين","كولومبيا","شيلي"],en:["Argentina","Colombia","Chile"]}},
+  {flag:"🇮🇳",a:{fr:"Inde",ar:"الهند",en:"India"},hint:{fr:"Taj Mahal",ar:"تاج محل",en:"Taj Mahal"},w:{fr:["Pakistan","Bangladesh","Népal"],ar:["باكستان","بنغلاديش","نيبال"],en:["Pakistan","Bangladesh","Nepal"]}},
+  {flag:"🇷🇺",a:{fr:"Russie",ar:"روسيا",en:"Russia"},hint:{fr:"Plus grand pays du monde",ar:"أكبر دول العالم",en:"Largest country"},w:{fr:["Ukraine","Kazakhstan","Biélorussie"],ar:["أوكرانيا","كازاخستان","بيلاروسيا"],en:["Ukraine","Kazakhstan","Belarus"]}},
+  {flag:"🇸🇦",a:{fr:"Arabie Saoudite",ar:"المملكة العربية السعودية",en:"Saudi Arabia"},hint:{fr:"La Mecque",ar:"مكة المكرمة",en:"Mecca"},w:{fr:["Irak","Jordanie","Yémen"],ar:["العراق","الأردن","اليمن"],en:["Iraq","Jordan","Yemen"]}},
+  {flag:"🇪🇬",a:{fr:"Égypte",ar:"مصر",en:"Egypt"},hint:{fr:"Pyramides de Gizeh",ar:"أهرامات الجيزة",en:"Pyramids of Giza"},w:{fr:["Libye","Soudan","Jordanie"],ar:["ليبيا","السودان","الأردن"],en:["Libya","Sudan","Jordan"]}},
+];
+const WILAYAS_DZ=[
+  {num:1, name:"Adrar",       hint:"Grand Erg Occidental, extrême sud-ouest"},
+  {num:2, name:"Chlef",       hint:"Vallée du Chélif, nord-ouest, anciennement Orléansville"},
+  {num:3, name:"Laghouat",    hint:"Porte du désert, entre nord et Sahara"},
+  {num:4, name:"Oum El Bouaghi", hint:"Hauts Plateaux de l'Est, proche Ain Beïda"},
+  {num:5, name:"Batna",       hint:"Aurès, près des gorges de Timgad romaine"},
+  {num:6, name:"Béjaïa",      hint:"Port sur la Méditerranée, Kabylie, Soummam"},
+  {num:7, name:"Biskra",      hint:"Portes du Sahara, oasis, dattes Deglet Nour"},
+  {num:8, name:"Béchar",      hint:"Saoura, frontière Maroc, ex-Colomb Béchar"},
+  {num:9, name:"Blida",       hint:"Atlas Blidéen, roses, proche Alger au sud"},
+  {num:10,name:"Bouira",      hint:"Kabylie du Djurdjura, entre Alger et Béjaïa"},
+  {num:11,name:"Tamanrasset", hint:"Hoggar, Touaregs, point le plus au sud de l'Algérie"},
+  {num:12,name:"Tébessa",     hint:"Extrême nord-est, frontière Tunisie, phosphates"},
+  {num:13,name:"Tlemcen",     hint:"Perle du Maghreb, mosquées, frontière Maroc nord"},
+  {num:14,name:"Tiaret",      hint:"Hauts Plateaux, chevaux pur-sang, steppe"},
+  {num:15,name:"Tizi Ouzou",  hint:"Grande Kabylie, Djurdjura, cœur berbère"},
+  {num:16,name:"Alger",       hint:"Capitale de l'Algérie, la Casbah, Méditerranée"},
+  {num:17,name:"Djelfa",      hint:"Hauts Plateaux, moutons, entre Alger et Ghardaïa"},
+  {num:18,name:"Jijel",       hint:"Côte rocheuse Méditerranée, forêt, cascades"},
+  {num:19,name:"Sétif",       hint:"Hauts Plateaux de l'Est, 2e ville économique"},
+  {num:20,name:"Saïda",       hint:"Hauts Plateaux ouest, entre Tiaret et Tlemcen"},
+  {num:21,name:"Skikda",      hint:"Port pétrolier, Méditerranée est, ex-Philippeville"},
+  {num:22,name:"Sidi Bel Abbes", hint:"Plaine de la Mekerra, nord-ouest, ex-ville Légion"},
+  {num:23,name:"Annaba",      hint:"Hippone, port industriel, Méditerranée extrême est"},
+  {num:24,name:"Guelma",      hint:"Nord-est, vallée de la Seybouse, thermes Hammam"},
+  {num:25,name:"Constantine", hint:"Ville des ponts suspendus, nord-est, Rhumel"},
+  {num:26,name:"Médéa",       hint:"Atlas Tellien, au sud d'Alger, pommiers"},
+  {num:27,name:"Mostaganem",  hint:"Port sur la Méditerranée, entre Oran et Chlef"},
+  {num:28,name:"M Sila",      hint:"Hauts Plateaux centre, entre Sétif et Biskra"},
+  {num:29,name:"Mascara",     hint:"Vins, nord-ouest, entre Oran et Tiaret"},
+  {num:30,name:"Ouargla",     hint:"Pétrole, palmeraie saharienne, Hassi Messaoud proche"},
+  {num:31,name:"Oran",        hint:"2e ville d'Algérie, port, Méditerranée nord-ouest"},
+  {num:32,name:"El Bayadh",   hint:"Hauts Plateaux sud-ouest, steppe, alfa"},
+  {num:33,name:"Illizi",      hint:"Tassili n'Ajjer, peintures rupestres, extrême sud-est"},
+  {num:34,name:"Bordj Bou Arréridj", hint:"Centre-nord, entre Sétif et Bejaia, industries"},
+  {num:35,name:"Boumerdès",   hint:"Côte est d'Alger, Méditerranée, université Boumerdes"},
+  {num:36,name:"El Tarf",     hint:"Extrême nord-est, lac Tonga, frontière Tunisie"},
+  {num:37,name:"Tindouf",     hint:"Extrême sud-ouest, frontière Mauritanie et Maroc"},
+  {num:38,name:"Tissemsilt",  hint:"Atlas Tellien, entre Tiaret et Chlef"},
+  {num:39,name:"El Oued",     hint:"Souf, vallée des oasis, ghout, dattes, Sahara est"},
+  {num:40,name:"Khenchela",   hint:"Aurès, Chelia point culminant d'Algérie nord"},
+  {num:41,name:"Souk Ahras",  hint:"Nord-est, ville de saint Augustin, frontière Tunisie"},
+  {num:42,name:"Tipaza",      hint:"Côte ouest d'Alger, ruines romaines, Méditerranée"},
+  {num:43,name:"Mila",        hint:"Nord-est, entre Constantine et Jijel"},
+  {num:44,name:"Ain Defla",   hint:"Vallée du Chélif, entre Chlef et Médéa"},
+  {num:45,name:"Naama",       hint:"Hauts Plateaux sud-ouest, frontière Maroc, alfa"},
+  {num:46,name:"Ain Témouchent", hint:"Côte nord-ouest, vignobles, proche Oran"},
+  {num:47,name:"Ghardaïa",    hint:"Mozabites, M'Zab, architecture UNESCO, Sahara nord"},
+  {num:48,name:"Relizane",    hint:"Plaine du Chélif, entre Chlef et Mostaganem"},
+];
+const NOMS_W=WILAYAS_DZ.map(w=>w.name);
+
+// ===== STATE =====
+let lang="fr",playerName="",currentMode="capitales",currentWilayaCountry="dz";
+let questions=[],current=0,score=0,streak=0,answered=[],lbTab="all",aideUsed=false;
+
+// ===== CORE NAVIGATION =====
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const el=document.getElementById(id);
+  if(el) el.classList.add("active");
+  window.scrollTo(0,0);
+}
+
+// ===== LANGUAGE =====
+function chooseLang(l){
+  lang=l;
+  localStorage.setItem("gq_lang",l);
+  applyDir();
+  const saved=localStorage.getItem("gq_pseudo");
+  if(saved){
+    playerName=saved;
+    goToMenu();
+  } else {
+    updateNameScreen();
+    showScreen("screen-name");
+    setTimeout(()=>{const ni=document.getElementById("name-input");if(ni)ni.focus();},300);
+  }
+}
+
+function applyDir(){
+  if(lang==="ar"){document.body.classList.add("ar");document.documentElement.setAttribute("dir","rtl");}
+  else{document.body.classList.remove("ar");document.documentElement.setAttribute("dir","ltr");}
+}
+
+function switchLang(l){
+  lang=l; localStorage.setItem("gq_lang",l); applyDir(); applyAllLabels(); updateLangBtns();
+  ["fr","ar","en"].forEach(x=>{const el=document.getElementById("lo-"+x);if(el)el.className="lang-opt"+(x===lang?" selected":"");});
+  closeModal("modal-lang");
+}
+
+function updateLangBtns(){
+  const lbl=T[lang].langBtn||"🌐";
+  ["tb-lang-btn","quiz-lang-btn"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=lbl;});
+}
+
+// ===== NAME SCREEN =====
+function updateNameScreen(){
+  const t=T[lang]||T.fr;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.textContent=v;};
+  set("name-title",t.nameTit); set("name-sub",t.nameSub); set("name-btn",t.nameBtn); set("name-skip",t.nameSkip);
+  const ni=document.getElementById("name-input"); if(ni) ni.placeholder=t.namePh||"";
+}
+
+function submitName(){
+  const v=(document.getElementById("name-input").value||"").trim();
+  playerName=v||(T[lang].player||"Joueur");
+  localStorage.setItem("gq_pseudo",playerName);
+  goToMenu();
+}
+function skipName(){playerName="";goToMenu();}
+
+// ===== MENU =====
+function goToMenu(){
+  applyAllLabels();
+  updateLangBtns();
+  showScreen("screen-menu");
+}
+
+function applyAllLabels(){
+  const t=T[lang]||T.fr;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined)el.textContent=v;};
+  set("tb-pseudo",playerName?"👤 "+playerName:"");
+  set("tb-pseudo-quiz",playerName?"👤 "+playerName:"");
+  set("menu-title",t.menuTitle);
+  set("mc-cap",t.mcCap); set("mc-cap-d",t.mcCapD);
+  set("mc-dra",t.mcDra); set("mc-dra-d",t.mcDraD);
+  set("mc-carte",t.mcCarte); set("mc-carte-d",t.mcCarteD);
+  set("mc-wil",t.mcWil); set("mc-wil-d",t.mcWilD);
+  set("mc-pays",t.mcPays); set("mc-pays-d",t.mcPaysD);
+  set("mc-mix",t.mcMix); set("mc-mix-d",t.mcMixD);
+  set("cs-title",t.csTitle); set("cs-sub",t.csSub);
+  set("lbl-score",t.score); set("lbl-streak",t.streak); set("lbl-total",t.total);
+  set("lb-title",t.lbTitle);
+  set("mp-title",t.mpTitle); set("mp-save",t.mpSave);
+  set("btn-back",t.btnBack); set("btn-aide",t.btnAide); set("btn-passer",t.btnPasser);
+  set("r-rejouer",t.rRejouer); set("r-menu",t.rMenu); set("r-lb",t.rLb);
+  updateNameScreen();
+}
+
+// ===== COUNTRY SELECT =====
+const WILAYA_COUNTRIES=[
+  {code:"dz",flag:"🇩🇿",name:{fr:"Algérie",ar:"الجزائر",en:"Algeria"},wilayas:[
+    {num:1,name:"Adrar"},{num:2,name:"Chlef"},{num:3,name:"Laghouat"},{num:4,name:"Oum El Bouaghi"},
+    {num:5,name:"Batna"},{num:6,name:"Béjaïa"},{num:7,name:"Biskra"},{num:8,name:"Béchar"},
+    {num:9,name:"Blida"},{num:10,name:"Bouira"},{num:11,name:"Tamanrasset"},{num:12,name:"Tébessa"},
+    {num:13,name:"Tlemcen"},{num:14,name:"Tiaret"},{num:15,name:"Tizi Ouzou"},{num:16,name:"Alger"},
+    {num:17,name:"Djelfa"},{num:18,name:"Jijel"},{num:19,name:"Sétif"},{num:20,name:"Saïda"},
+    {num:21,name:"Skikda"},{num:22,name:"Sidi Bel Abbes"},{num:23,name:"Annaba"},{num:24,name:"Guelma"},
+    {num:25,name:"Constantine"},{num:26,name:"Médéa"},{num:27,name:"Mostaganem"},{num:28,name:"M Sila"},
+    {num:29,name:"Mascara"},{num:30,name:"Ouargla"},{num:31,name:"Oran"},{num:32,name:"El Bayadh"},
+    {num:33,name:"Illizi"},{num:34,name:"Bordj Bou Arréridj"},{num:35,name:"Boumerdès"},{num:36,name:"El Tarf"},
+    {num:37,name:"Tindouf"},{num:38,name:"Tissemsilt"},{num:39,name:"El Oued"},{num:40,name:"Khenchela"},
+    {num:41,name:"Souk Ahras"},{num:42,name:"Tipaza"},{num:43,name:"Mila"},{num:44,name:"Ain Defla"},
+    {num:45,name:"Naama"},{num:46,name:"Ain Témouchent"},{num:47,name:"Ghardaïa"},{num:48,name:"Relizane"}
+  ]},
+  {code:"ma",flag:"🇲🇦",name:{fr:"Maroc",ar:"المغرب",en:"Morocco"},wilayas:[
+    {num:1,name:"Tanger-Tétouan-Al Hoceïma"},{num:2,name:"Oriental"},{num:3,name:"Fès-Meknès"},
+    {num:4,name:"Rabat-Salé-Kénitra"},{num:5,name:"Béni Mellal-Khénifra"},{num:6,name:"Casablanca-Settat"},
+    {num:7,name:"Marrakech-Safi"},{num:8,name:"Drâa-Tafilalet"},{num:9,name:"Souss-Massa"},
+    {num:10,name:"Guelmim-Oued Noun"},{num:11,name:"Laâyoune-Sakia El Hamra"},{num:12,name:"Dakhla-Oued Ed-Dahab"}
+  ]},
+  {code:"tn",flag:"🇹🇳",name:{fr:"Tunisie",ar:"تونس",en:"Tunisia"},wilayas:[
+    {num:1,name:"Tunis"},{num:2,name:"Ariana"},{num:3,name:"Ben Arous"},{num:4,name:"Manouba"},
+    {num:5,name:"Nabeul"},{num:6,name:"Zaghouan"},{num:7,name:"Bizerte"},{num:8,name:"Béja"},
+    {num:9,name:"Jendouba"},{num:10,name:"Le Kef"},{num:11,name:"Siliana"},{num:12,name:"Sousse"},
+    {num:13,name:"Monastir"},{num:14,name:"Mahdia"},{num:15,name:"Sfax"},{num:16,name:"Kairouan"},
+    {num:17,name:"Kasserine"},{num:18,name:"Sidi Bouzid"},{num:19,name:"Gabès"},{num:20,name:"Médenine"},
+    {num:21,name:"Tataouine"},{num:22,name:"Gafsa"},{num:23,name:"Tozeur"},{num:24,name:"Kébili"}
+  ]},
+  {code:"eg",flag:"🇪🇬",name:{fr:"Égypte",ar:"مصر",en:"Egypt"},wilayas:[
+    {num:1,name:"Le Caire"},{num:2,name:"Gizeh"},{num:3,name:"Alexandrie"},{num:4,name:"Louxor"},
+    {num:5,name:"Assouan"},{num:6,name:"Assiout"},{num:7,name:"Suez"},{num:8,name:"Ismaïlia"},
+    {num:9,name:"Port-Saïd"},{num:10,name:"Fayoum"},{num:11,name:"Minya"},{num:12,name:"Qéna"},
+    {num:13,name:"Charm el-Cheikh"},{num:14,name:"Damiette"},{num:15,name:"Mansoura"},{num:16,name:"Zagazig"},
+    {num:17,name:"Tanta"},{num:18,name:"Beni Suef"},{num:19,name:"Sohag"},{num:20,name:"Marsa Matruh"}
+  ]},
+  {code:"sa",flag:"🇸🇦",name:{fr:"Arabie Saoudite",ar:"المملكة العربية السعودية",en:"Saudi Arabia"},wilayas:[
+    {num:1,name:"Riyad"},{num:2,name:"La Mecque"},{num:3,name:"Médine"},{num:4,name:"Province de l Est"},
+    {num:5,name:"Asir"},{num:6,name:"Tabuk"},{num:7,name:"Hail"},{num:8,name:"Nord des Frontières"},
+    {num:9,name:"Jizan"},{num:10,name:"Nadjrane"},{num:11,name:"Al-Bahah"},{num:12,name:"Al-Jouf"},
+    {num:13,name:"Qassim"}
+  ]},
+  {code:"ly",flag:"🇱🇾",name:{fr:"Libye",ar:"ليبيا",en:"Libya"},wilayas:[
+    {num:1,name:"Tripoli"},{num:2,name:"Benghazi"},{num:3,name:"Misrata"},{num:4,name:"Tobrouk"},
+    {num:5,name:"Syrte"},{num:6,name:"Sebha"},{num:7,name:"Gharyan"},{num:8,name:"Zintan"},
+    {num:9,name:"Zliten"},{num:10,name:"Al-Bayda"},{num:11,name:"Derna"},{num:12,name:"Ghadamès"}
+  ]},
+  {code:"mr",flag:"🇲🇷",name:{fr:"Mauritanie",ar:"موريتانيا",en:"Mauritania"},wilayas:[
+    {num:1,name:"Hodh Ech Chargui"},{num:2,name:"Hodh El Gharbi"},{num:3,name:"Assaba"},
+    {num:4,name:"Gorgol"},{num:5,name:"Brakna"},{num:6,name:"Trarza"},{num:7,name:"Adrar"},
+    {num:8,name:"Dakhlet Nouadhibou"},{num:9,name:"Tagant"},{num:10,name:"Guidimakha"},
+    {num:11,name:"Tiris Zemmour"},{num:12,name:"Inchiri"},{num:13,name:"Nouakchott Ouest"}
+  ]},
+  {code:"sd",flag:"🇸🇩",name:{fr:"Soudan",ar:"السودان",en:"Sudan"},wilayas:[
+    {num:1,name:"Khartoum"},{num:2,name:"Omdurman"},{num:3,name:"Port-Soudan"},{num:4,name:"Kassala"},
+    {num:5,name:"Gedaref"},{num:6,name:"Wad Madani"},{num:7,name:"El Obeid"},{num:8,name:"El Fasher"},
+    {num:9,name:"Nyala"},{num:10,name:"El Geneina"},{num:11,name:"Ed Damazin"},{num:12,name:"Sennar"},
+    {num:13,name:"Atbara"},{num:14,name:"Dongola"},{num:15,name:"Kadugli"},{num:16,name:"Malakal"}
+  ]},
+  {code:"sn",flag:"🇸🇳",name:{fr:"Sénégal",ar:"السنغال",en:"Senegal"},wilayas:[
+    {num:1,name:"Dakar"},{num:2,name:"Thiès"},{num:3,name:"Diourbel"},{num:4,name:"Fatick"},
+    {num:5,name:"Kaolack"},{num:6,name:"Kaffrine"},{num:7,name:"Tambacounda"},{num:8,name:"Kédougou"},
+    {num:9,name:"Kolda"},{num:10,name:"Ziguinchor"},{num:11,name:"Sédhiou"},{num:12,name:"Saint-Louis"},
+    {num:13,name:"Louga"},{num:14,name:"Matam"}
+  ]},
+  {code:"cm",flag:"🇨🇲",name:{fr:"Cameroun",ar:"الكاميرون",en:"Cameroon"},wilayas:[
+    {num:1,name:"Adamaoua"},{num:2,name:"Centre"},{num:3,name:"Est"},{num:4,name:"Extrême-Nord"},
+    {num:5,name:"Littoral"},{num:6,name:"Nord"},{num:7,name:"Nord-Ouest"},{num:8,name:"Ouest"},
+    {num:9,name:"Sud"},{num:10,name:"Sud-Ouest"}
+  ]},
+  {code:"fr",flag:"🇫🇷",name:{fr:"France",ar:"فرنسا",en:"France"},wilayas:[
+    {num:1,name:"Île-de-France"},{num:2,name:"Provence-Alpes-Côte d Azur"},{num:3,name:"Auvergne-Rhône-Alpes"},
+    {num:4,name:"Occitanie"},{num:5,name:"Nouvelle-Aquitaine"},{num:6,name:"Hauts-de-France"},
+    {num:7,name:"Grand Est"},{num:8,name:"Normandie"},{num:9,name:"Bretagne"},
+    {num:10,name:"Pays de la Loire"},{num:11,name:"Centre-Val de Loire"},{num:12,name:"Bourgogne-Franche-Comté"},
+    {num:13,name:"Corse"}
+  ]},
+  {code:"de",flag:"🇩🇪",name:{fr:"Allemagne",ar:"ألمانيا",en:"Germany"},wilayas:[
+    {num:1,name:"Bavière"},{num:2,name:"Rhénanie-du-Nord-Westphalie"},{num:3,name:"Bade-Wurtemberg"},
+    {num:4,name:"Basse-Saxe"},{num:5,name:"Hesse"},{num:6,name:"Rhénanie-Palatinat"},
+    {num:7,name:"Saxe"},{num:8,name:"Thuringe"},{num:9,name:"Brandebourg"},
+    {num:10,name:"Saxe-Anhalt"},{num:11,name:"Mecklembourg"},{num:12,name:"Schleswig-Holstein"},
+    {num:13,name:"Sarre"},{num:14,name:"Berlin"},{num:15,name:"Hambourg"},{num:16,name:"Brême"}
+  ]},
+  {code:"it",flag:"🇮🇹",name:{fr:"Italie",ar:"إيطاليا",en:"Italy"},wilayas:[
+    {num:1,name:"Lombardie"},{num:2,name:"Latium"},{num:3,name:"Campanie"},{num:4,name:"Sicile"},
+    {num:5,name:"Vénétie"},{num:6,name:"Piémont"},{num:7,name:"Émilie-Romagne"},{num:8,name:"Apuille"},
+    {num:9,name:"Toscane"},{num:10,name:"Calabre"},{num:11,name:"Sardaigne"},{num:12,name:"Ligurie"},
+    {num:13,name:"Marches"},{num:14,name:"Abruzzes"},{num:15,name:"Ombrie"},{num:16,name:"Basilicate"},
+    {num:17,name:"Molise"},{num:18,name:"Frioul"},{num:19,name:"Trentin"},{num:20,name:"Val d Aoste"}
+  ]},
+  {code:"us",flag:"🇺🇸",name:{fr:"États-Unis",ar:"الولايات المتحدة",en:"United States"},wilayas:[
+    {num:1,name:"Californie"},{num:2,name:"Texas"},{num:3,name:"Floride"},{num:4,name:"New York"},
+    {num:5,name:"Pennsylvanie"},{num:6,name:"Illinois"},{num:7,name:"Ohio"},{num:8,name:"Géorgie"},
+    {num:9,name:"Caroline du Nord"},{num:10,name:"Michigan"},{num:11,name:"Arizona"},{num:12,name:"Washington"},
+    {num:13,name:"Colorado"},{num:14,name:"Tennessee"},{num:15,name:"Indiana"},{num:16,name:"Missouri"},
+    {num:17,name:"Nevada"},{num:18,name:"Oregon"},{num:19,name:"Wisconsin"},{num:20,name:"Alaska"},
+    {num:21,name:"Hawaii"},{num:22,name:"Massachusetts"},{num:23,name:"Connecticut"},{num:24,name:"Maryland"},
+    {num:25,name:"Minnesota"},{num:26,name:"Alabama"},{num:27,name:"Mississippi"},{num:28,name:"Louisiana"},
+    {num:29,name:"Oklahoma"},{num:30,name:"Arkansas"},{num:31,name:"Utah"},{num:32,name:"Kansas"},
+    {num:33,name:"Virginie"},{num:34,name:"Iowa"},{num:35,name:"Nebraska"},{num:36,name:"Idaho"},
+    {num:37,name:"Wyoming"},{num:38,name:"Montana"},{num:39,name:"Dakota du Nord"},{num:40,name:"Dakota du Sud"},
+    {num:41,name:"Nouveau-Mexique"},{num:42,name:"Maine"},{num:43,name:"Rhode Island"},{num:44,name:"Vermont"},
+    {num:45,name:"New Hampshire"},{num:46,name:"Delaware"},{num:47,name:"Caroline du Sud"},
+    {num:48,name:"Virginie-Occidentale"},{num:49,name:"New Jersey"},{num:50,name:"Kentucky"}
+  ]},
+  {code:"cn",flag:"🇨🇳",name:{fr:"Chine",ar:"الصين",en:"China"},wilayas:[
+    {num:1,name:"Guangdong"},{num:2,name:"Shandong"},{num:3,name:"Henan"},{num:4,name:"Sichuan"},
+    {num:5,name:"Jiangsu"},{num:6,name:"Hebei"},{num:7,name:"Hunan"},{num:8,name:"Anhui"},
+    {num:9,name:"Hubei"},{num:10,name:"Zhejiang"},{num:11,name:"Guangxi"},{num:12,name:"Yunnan"},
+    {num:13,name:"Liaoning"},{num:14,name:"Shanxi"},{num:15,name:"Shaanxi"},{num:16,name:"Jiangxi"},
+    {num:17,name:"Guizhou"},{num:18,name:"Heilongjiang"},{num:19,name:"Jilin"},{num:20,name:"Fujian"},
+    {num:21,name:"Gansu"},{num:22,name:"Qinghai"},{num:23,name:"Xinjiang"},{num:24,name:"Tibet"},
+    {num:25,name:"Mongolie intérieure"},{num:26,name:"Ningxia"},{num:27,name:"Hainan"},
+    {num:28,name:"Pékin"},{num:29,name:"Shanghai"},{num:30,name:"Tianjin"},{num:31,name:"Chongqing"}
+  ]},
+  {code:"br",flag:"🇧🇷",name:{fr:"Brésil",ar:"البرازيل",en:"Brazil"},wilayas:[
+    {num:1,name:"São Paulo"},{num:2,name:"Minas Gerais"},{num:3,name:"Rio de Janeiro"},{num:4,name:"Bahia"},
+    {num:5,name:"Rio Grande do Sul"},{num:6,name:"Paraná"},{num:7,name:"Pernambuco"},{num:8,name:"Ceará"},
+    {num:9,name:"Pará"},{num:10,name:"Maranhão"},{num:11,name:"Amazonas"},{num:12,name:"Santa Catarina"},
+    {num:13,name:"Goiás"},{num:14,name:"Espírito Santo"},{num:15,name:"Paraíba"},{num:16,name:"Mato Grosso"},
+    {num:17,name:"Rio Grande do Norte"},{num:18,name:"Alagoas"},{num:19,name:"Piauí"},{num:20,name:"Mato Grosso do Sul"},
+    {num:21,name:"Sergipe"},{num:22,name:"Rondônia"},{num:23,name:"Tocantins"},{num:24,name:"Acre"},
+    {num:25,name:"Amapá"},{num:26,name:"Roraima"},{num:27,name:"Brasília"}
+  ]},
+  {code:"ru",flag:"🇷🇺",name:{fr:"Russie",ar:"روسيا",en:"Russia"},wilayas:[
+    {num:1,name:"Moscou"},{num:2,name:"Saint-Pétersbourg"},{num:3,name:"Sibérie occidentale"},{num:4,name:"Oural"},
+    {num:5,name:"Volga"},{num:6,name:"Caucase du Nord"},{num:7,name:"Extrême-Orient"},{num:8,name:"Centre"},
+    {num:9,name:"Nord-Ouest"},{num:10,name:"Sibérie"},{num:11,name:"Yakoutie"},{num:12,name:"Krasnodar"},
+    {num:13,name:"Tatarstan"},{num:14,name:"Bachkirie"},{num:15,name:"Tcheliabinsk"},{num:16,name:"Sverdlovsk"},
+    {num:17,name:"Novosibirsk"},{num:18,name:"Omsk"},{num:19,name:"Samara"},{num:20,name:"Rostov"}
+  ]},
+  {code:"in",flag:"🇮🇳",name:{fr:"Inde",ar:"الهند",en:"India"},wilayas:[
+    {num:1,name:"Uttar Pradesh"},{num:2,name:"Maharashtra"},{num:3,name:"Bihar"},{num:4,name:"Bengale-Occidental"},
+    {num:5,name:"Madhya Pradesh"},{num:6,name:"Tamil Nadu"},{num:7,name:"Rajasthan"},{num:8,name:"Karnataka"},
+    {num:9,name:"Gujarat"},{num:10,name:"Andhra Pradesh"},{num:11,name:"Odisha"},{num:12,name:"Telangana"},
+    {num:13,name:"Kérala"},{num:14,name:"Jharkhand"},{num:15,name:"Assam"},{num:16,name:"Punjab"},
+    {num:17,name:"Chhattisgarh"},{num:18,name:"Haryana"},{num:19,name:"Delhi"},{num:20,name:"Jammu-et-Cachemire"},
+    {num:21,name:"Uttarakhand"},{num:22,name:"Himachal Pradesh"},{num:23,name:"Tripura"},{num:24,name:"Meghalaya"},
+    {num:25,name:"Manipur"},{num:26,name:"Nagaland"},{num:27,name:"Goa"},{num:28,name:"Arunachal Pradesh"}
+  ]},
+];
+
+function showCountrySelect(){
+  applyAllLabels();
+  const t=T[lang];
+  const grid=document.getElementById("country-grid");
+  grid.innerHTML="";
+  WILAYA_COUNTRIES.forEach(c=>{
+    const card=document.createElement("div");
+    card.className="country-card";
+    card.innerHTML=`<span style="font-size:2rem;pointer-events:none;">${c.flag}</span><span style="font-weight:700;font-size:.88rem;pointer-events:none;text-align:center;">${c.name[lang]||c.name.fr}</span>`;
+    card.onclick=()=>startWilayaQuiz(c.code);
+    grid.appendChild(card);
+  });
+  showScreen("screen-country");
+}
+
+function startWilayaQuiz(code){
+  const country=WILAYA_COUNTRIES.find(c=>c.code===code);
+  if(!country)return;
+  currentWilayaCountry=code;
+  currentMode="wilayas";
+  const wList=country.wilayas;
+  const allN=wList.map(w=>w.name);
+  const t=T[lang];
+  questions=shuffle(wList).slice(0,10).map(w=>{
+    const wr=shuffle(allN.filter(n=>n!==w.name)).slice(0,3);
+    return{type:"wil",text:t.qWil+" "+w.num+" ?",answer:w.name,hint:w.hint||(country.name[lang]+" #"+w.num),choices:shuffle([w.name,...wr]),cat:country.flag+" "+t.mcWil,visual:country.flag,vtype:""};
+  });
+  current=0; score=0; streak=0; answered=new Array(questions.length).fill(null); aideUsed=false;
+  document.getElementById("quiz-area").style.display="block";
+  document.getElementById("result-area").style.display="none";
+  applyAllLabels(); updateLangBtns();
+  showScreen("screen-quiz"); loadQ();
+}
+
+// ===== UTILS =====
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ===== SVG MAPS — Contours réels des pays =====
+const MAP_IMGS={
+  france:    "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/fr/1024.png",
+  algerie:   "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/dz/1024.png",
+  maroc:     "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/ma/1024.png",
+  egypte:    "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/eg/1024.png",
+  tunisie:   "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/tn/1024.png",
+  espagne:   "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/es/1024.png",
+  italie:    "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/it/1024.png",
+  allemagne: "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/de/1024.png",
+  russie:    "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/ru/1024.png",
+  bresil:    "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/br/1024.png",
+  australie: "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/au/1024.png",
+  chine:     "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/cn/1024.png",
+  japon:     "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/jp/1024.png",
+};
+
+
+// ===== BUILD QUESTIONSS =====
+function buildQ(mode){
+  const t=T[lang];
+  if(mode==="capitales") return shuffle(CAPITALES).slice(0,10).map(d=>({type:"cap",text:t.qCap+" "+d.a[lang]+" ?",answer:d.cap[lang],hint:d.hint[lang],choices:shuffle([d.cap[lang],...d.w[lang]]),cat:t.mcCap,visual:"",vtype:""}));
+  if(mode==="drapeaux") return shuffle(DRAPEAUX).slice(0,10).map(d=>({type:"flag",text:t.qDra,answer:d.a[lang],hint:d.hint[lang],choices:shuffle([d.a[lang],...d.w[lang]]),cat:t.mcDra,visual:d.flag,vtype:"flag"}));
+  if(mode==="carte"){const pool=[];while(pool.length<10)pool.push(...CARTES);return shuffle(pool).slice(0,10).map(d=>({type:"map",text:t.qCarte,answer:d.a[lang],hint:d.hint[lang],choices:shuffle([d.a[lang],...d.w[lang]]),cat:t.mcCarte,visual:"🗺️",vtype:"map",mapKey:d.mapKey}));}
+  if(mode==="pays") return shuffle(PAYS_DATA).slice(0,10).map(d=>({type:"pays",text:t.qPays,answer:d.a[lang],hint:d.hint[lang],choices:shuffle([d.a[lang],...d.w[lang]]),cat:t.mcPays,visual:d.flag,vtype:"flag"}));
+  if(mode==="wilayas"){
+    const allN=WILAYAS_DZ.map(w=>w.name);
+    return shuffle(WILAYAS_DZ).slice(0,10).map(w=>{
+      const wr=shuffle(allN.filter(n=>n!==w.name)).slice(0,3);
+      return{type:"wil",text:t.qWil+" "+w.num+" ?",answer:w.name,hint:w.hint||t.wilaya+" #"+w.num,choices:shuffle([w.name,...wr]),cat:t.mcWil,visual:"🏙️",vtype:""};
+    });
+  }
+  if(mode==="mix"){
+    const allN=WILAYAS_DZ.map(w=>w.name);
+    const pool=[
+      ...shuffle(CAPITALES).slice(0,3).map(d=>({type:"cap",text:t.qCap+" "+d.a[lang]+" ?",answer:d.cap[lang],hint:d.hint[lang],choices:shuffle([d.cap[lang],...d.w[lang]]),cat:t.mcCap,visual:"",vtype:""})),
+      ...shuffle(DRAPEAUX).slice(0,3).map(d=>({type:"flag",text:t.qDra,answer:d.a[lang],hint:d.hint[lang],choices:shuffle([d.a[lang],...d.w[lang]]),cat:t.mcDra,visual:d.flag,vtype:"flag"})),
+      ...shuffle(CARTES).slice(0,2).map(d=>({type:"map",text:t.qCarte,answer:d.a[lang],hint:d.hint[lang],choices:shuffle([d.a[lang],...d.w[lang]]),cat:t.mcCarte,visual:"🗺️",vtype:"map",mapKey:d.mapKey})),
+      ...shuffle(WILAYAS_DZ).slice(0,2).map(w=>{const wr=shuffle(allN.filter(n=>n!==w.name)).slice(0,3);return{type:"wil",text:t.qWil+" "+w.num+" ?",answer:w.name,hint:w.hint||t.wilaya+" #"+w.num,choices:shuffle([w.name,...wr]),cat:t.mcWil,visual:"🏙️",vtype:""};})
+    ];
+    return shuffle(pool).slice(0,10);
+  }
+  return [];
+}
+
+// ===== QUIZ =====
+function startQuiz(mode,country){
+  currentMode=mode; currentWilayaCountry=country||"dz";
+  questions=buildQ(mode); current=0; score=0; streak=0;
+  answered=new Array(questions.length).fill(null); aideUsed=false;
+  document.getElementById("quiz-area").style.display="block";
+  document.getElementById("result-area").style.display="none";
+  applyAllLabels(); updateLangBtns();
+  showScreen("screen-quiz");
+  loadQ();
+}
+
+function loadQ(){
+  if(current>=questions.length){showResult();return;}
+  const q=questions[current]; aideUsed=false;
+  // Progress
+  document.getElementById("progress-fill").style.width=((current/questions.length)*100)+"%";
+  document.getElementById("progress-text").textContent=(current+1)+" / "+questions.length;
+  // Scores
+  document.getElementById("score").textContent=score;
+  document.getElementById("streak").textContent=streak+"🔥";
+  const cumul=parseInt(localStorage.getItem("gq_cumul_"+currentMode)||"0");
+  document.getElementById("total-pts").textContent=cumul+score;
+  // Question
+  document.getElementById("cat-tag").textContent=q.cat;
+  const vd=document.getElementById("visual-display");
+  if(q.vtype==="map"&&q.mapKey&&MAP_IMGS[q.mapKey]){
+    vd.innerHTML=`<img class="map-img" src="${MAP_IMGS[q.mapKey]}" alt="carte" onerror="this.parentElement.innerHTML='<span class=\'visual-big\'>🗺️</span>'">`;
+  } else if(q.visual){
+    vd.innerHTML=`<span class="visual-big">${q.visual}</span>`;
+  } else {
+    vd.innerHTML="";
+  }
+  document.getElementById("question-text").textContent=q.text;
+  document.getElementById("hint-text").textContent="";
+  document.getElementById("feedback").textContent="";
+  document.getElementById("feedback").className="feedback";
+  document.getElementById("next-btn").style.display="none";
+  // Answers
+  const answersEl=document.getElementById("answers");
+  answersEl.innerHTML="";
+  q.choices.forEach((c,i)=>{
+    const btn=document.createElement("button");
+    btn.className="answer-btn";
+    btn.textContent=c;
+    btn.dataset.choice=c;
+    btn.dataset.answer=q.answer;
+    btn.onclick=function(){checkA(this,this.dataset.choice,this.dataset.answer);};
+    answersEl.appendChild(btn);
+  });
+  // Back btn
+  const bb=document.getElementById("btn-back");
+  bb.disabled=current===0; bb.style.opacity=current===0?"0.3":"1";
+  // Restore if already answered
+  if(answered[current]!==null) restoreA(current);
+}
+
+function checkA(btn,chosen,correct){
+  if(answered[current]!==null)return;
+  const ok=chosen===correct;
+  answered[current]=ok;
+  document.querySelectorAll("#answers .answer-btn").forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.choice===correct) b.classList.add("correct");
+  });
+  if(!ok) btn.classList.add("wrong");
+  const fb=document.getElementById("feedback");
+  if(ok){
+    score++; streak++;
+    fb.textContent=["✅ Bravo !","✅ Excellent !","✅ Parfait !"][0|Math.random()*3];
+    fb.className="feedback ok";
+  } else {
+    streak=0; fb.textContent="❌ "+correct; fb.className="feedback ko";
+  }
+  document.getElementById("score").textContent=score;
+  document.getElementById("streak").textContent=streak+"🔥";
+  document.getElementById("next-btn").style.display="block";
+}
+
+function restoreA(idx){
+  const q=questions[idx];
+  document.querySelectorAll("#answers .answer-btn").forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.choice===q.answer) b.classList.add("correct");
+  });
+  document.getElementById("next-btn").style.display="block";
+}
+
+function nextQuestion(){current++;loadQ();}
+function prevQuestion(){if(current>0){current--;loadQ();}}
+function passerQuestion(){if(answered[current]===null)answered[current]=false;current++;loadQ();}
+
+function showAide(){
+  if(aideUsed)return; aideUsed=true;
+  const q=questions[current];
+  const hint=q.hint||(T[lang].aideText||"");
+  document.getElementById("aide-text").textContent=hint;
+  document.getElementById("hint-text").textContent="💡 "+hint;
+  openModal("modal-aide");
+}
+
+function showResult(){
+  document.getElementById("quiz-area").style.display="none";
+  document.getElementById("result-area").style.display="flex";
+  const t=T[lang]; const pct=score/questions.length;
+  document.getElementById("result-emoji").textContent=pct>=0.8?"🏆":pct>=0.5?"👍":"💪";
+  document.getElementById("result-title").textContent=pct>=0.8?t.resultGood:pct>=0.5?t.resultOk:t.resultBad;
+  document.getElementById("result-score").textContent=score;
+  document.getElementById("result-total").textContent=t.resultTotal;
+  const prev=parseInt(localStorage.getItem("gq_cumul_"+currentMode)||"0");
+  const newC=prev+score;
+  localStorage.setItem("gq_cumul_"+currentMode,newC);
+  document.getElementById("result-cumul").textContent=(t.resultCumul||"Total:")+" "+newC+" pts";
+  saveScore();
+}
+
+function restartQuiz(){
+  document.getElementById("result-area").style.display="none";
+  startQuiz(currentMode,currentWilayaCountry);
+}
+function goBackMenu(){showScreen("screen-menu");}
+
+// ===== FIREBASE =====
+async function saveScore(){
+  if(!playerName)return;
+  const scores=getScores();
+  const ex=scores.find(s=>s.name===playerName&&s.mode===currentMode);
+  if(ex){ex.cumul=(ex.cumul||0)+score;ex.games=(ex.games||0)+1;ex.score=Math.max(ex.score||0,score);}
+  else scores.push({name:playerName,score,cumul:score,games:1,total:10,mode:currentMode,lang,date:Date.now()});
+  scores.sort((a,b)=>(b.cumul||b.score)-(a.cumul||a.score));
+  localStorage.setItem("gq_scores",JSON.stringify(scores.slice(0,300)));
+  try{
+    if(!db)return;
+    const snap=await db.collection("scores").where("name","==",playerName).where("mode","==",currentMode).limit(1).get();
+    if(!snap.empty){const doc=snap.docs[0];const p=doc.data();await doc.ref.update({cumul:(p.cumul||0)+score,games:(p.games||0)+1,score:Math.max(p.score||0,score),date:firebase.firestore.FieldValue.serverTimestamp()});}
+    else await db.collection("scores").add({name:playerName,score,cumul:score,games:1,total:10,mode:currentMode,lang,date:firebase.firestore.FieldValue.serverTimestamp()});
+  }catch(e){console.log("Firebase:",e);}
+}
+function getScores(){try{return JSON.parse(localStorage.getItem("gq_scores")||"[]");}catch(e){return[];}}
+
+// ===== LEADERBOARD =====
+function openLbOverlay(){document.getElementById("lb-overlay").classList.add("show");renderLb();}
+function closeLbOverlay(){document.getElementById("lb-overlay").classList.remove("show");}
+function switchLbTab(tab,el){lbTab=tab;document.querySelectorAll(".lb-tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderLb();}
+async function renderLb(){
+  const t=T[lang]; const list=document.getElementById("lb-list");
+  list.innerHTML='<div class="lb-empty">⏳...</div>';
+  try{
+    let top=[];
+    if(db){let q=db.collection("scores").orderBy("cumul","desc").limit(100);if(lbTab!=="all")q=q.where("mode","==",lbTab);const snap=await q.get();snap.forEach(d=>top.push(d.data()));}
+    if(!top.length){let l=getScores();if(lbTab!=="all")l=l.filter(s=>s.mode===lbTab);top=l.sort((a,b)=>(b.cumul||b.score)-(a.cumul||a.score)).slice(0,50);}
+    if(!top.length){list.innerHTML=`<div class="lb-empty">${t.lbEmpty}</div>`;return;}
+    list.innerHTML=top.slice(0,50).map((s,i)=>{
+      const rc=i===0?"gold":i===1?"silver":i===2?"bronze":"";
+      const rd=i<3?["🥇","🥈","🥉"][i]:(i+1);
+      const isMe=s.name===playerName;
+      return `<div class="lb-row"><div class="lb-rank ${rc}">${rd}</div><div class="lb-name${isMe?" me":""}">${s.name}${isMe?` <small>(${t.you})</small>`:""}</div><div><div class="lb-pts">${s.cumul||s.score||0} pts</div><div class="lb-mode">${s.mode||""}</div></div></div>`;
+    }).join("");
+  }catch(e){list.innerHTML='<div class="lb-empty">Erreur</div>';}
+}
+
+// ===== MODALS =====
+function openModal(id){document.getElementById(id).classList.add("show");}
+function closeModal(id){document.getElementById(id).classList.remove("show");}
+function openPseudoModal(){document.getElementById("mp-input").value=playerName;openModal("modal-pseudo");}
+function savePseudo(){
+  const v=(document.getElementById("mp-input").value||"").trim();
+  if(v){playerName=v;localStorage.setItem("gq_pseudo",v);["tb-pseudo","tb-pseudo-quiz"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent="👤 "+playerName;});}
+  closeModal("modal-pseudo");
+}
+function openLangModal(){
+  ["fr","ar","en"].forEach(x=>{const el=document.getElementById("lo-"+x);if(el)el.className="lang-opt"+(x===lang?" selected":"");});
+  openModal("modal-lang");
+}
+
+// ===== INIT =====
+(function init(){
+  const sl=localStorage.getItem("gq_lang");
+  const sp=localStorage.getItem("gq_pseudo");
+  if(sl&&sp){lang=sl;playerName=sp;applyDir();goToMenu();}
+  else if(sl){lang=sl;applyDir();updateNameScreen();showScreen("screen-name");}
+  else{showScreen("screen-lang");}
+})();
+
+// ===== PWA =====
+let dP=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dP=e;setTimeout(()=>{const b=document.getElementById("pwa-banner");if(b)b.style.display="flex";},4000);});
+function installApp(){if(!dP)return;dP.prompt();dP.userChoice.then(()=>{document.getElementById("pwa-banner").style.display="none";dP=null;});}
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+</script>
+</body>
+</html>
